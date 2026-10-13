@@ -88,9 +88,6 @@ node build-release.mjs 1.2.0
 审核通过后由官方完成上架：包入库 → 计算 SHA-256 → 写入注册表（每个版本带哈希与 `downloadUrl`）→ 详情页的权限预览自动生成。之后发新版，就是把新版本插到队首，旧版本仍可下载。
 
 **社区货架**不用等审核节奏，分发方式见下一节。
-## 客户端会怎么装
-
-zip 会被下载校验（sha256）后解包到 `~/.notrat/plugins/<id>/`；写入顺序上 **`manifest.json` 最后落盘**（监听以它出现为安装信号），因此不会出现「脚本还没到位就被拉起」。装完默认启用（除非 manifest 里显式写了 `"enabled": false`）。
 
 ## 社区货架：自建仓库分发
 
@@ -132,7 +129,12 @@ curl -sL "<downloadUrl>" -o /tmp/x.zip && sha256sum /tmp/x.zip   # 对照 checks
 4. 客户端 → 插件市场 → 官方插件 tab → 安装 → 面板 / 入口出现 → 跑一遍冒烟。
 
 ::: tip 缓存
+后端响应是 no-cache，但 CDN 与客户端列表可能延迟 30 秒到 5 分钟。复核时带 `cache: "no-store"`。
 :::
+
+## 客户端会怎么装
+
+zip 会被下载校验（sha256）后解包到 `~/.notrat/plugins/<id>/`；写入顺序上 **`manifest.json` 最后落盘**（监听以它出现为安装信号），因此不会出现「脚本还没到位就被拉起」。装完默认启用（除非 manifest 里显式写了 `"enabled": false`）。
 
 ## 更新是怎么被用户收到的
 
