@@ -1,0 +1,51 @@
+# 构建 VitePress 文档站并发布到 GitHub Pages
+# 触发：push 到 main，或在 Actions 页面手动跑一次
+name: Deploy docs to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      # 部署根路径必须跟实际地址一致，否则 CSS/JS/图片全 404：
+      #   项目页 nestmold.github.io/NotratDoc/  -> /NotratDoc/
+      #   绑了自定义域名 docs.notrat.cn（站点在根上） -> /
+      DOCS_BASE: /NotratDoc/
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # lastUpdated 要读每篇的 git 提交时间，浅克隆会全变成同一天
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+      - run: yarn install --frozen-lockfile
+      - run: yarn build
+      - uses: actions/configure-pages@v4
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .vitepress/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

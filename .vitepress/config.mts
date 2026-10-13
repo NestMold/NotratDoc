@@ -1,14 +1,21 @@
 import { defineConfig } from "vitepress";
 
+// 部署根路径：GitHub Pages / Gitee Pages 的项目页都带子路径（/NotratDoc/ 之类），
+// 绑上自定义域名（docs.notrat.cn）后站点在根上，改成 "/" 即可。构建时用环境变量给。
+const base = process.env.DOCS_BASE || "/";
+
 export default defineConfig({
   title: "Notrat 文档",
+  base,
   description: "本地优先的 AI 工作台 —— 使用教程、插件开发、平台文档与版本更新记录",
   lang: "zh-CN",
   lastUpdated: true,
   cleanUrls: true,
   ignoreDeadLinks: true, // 文档仍在补写，允许暂缺的交叉引用
   head: [
-    ["link", { rel: "icon", href: "/favicon.ico" }],
+    // head 里的绝对路径 VitePress 不会自动加 base（导航链接、logo、markdown 里的图会自动加），
+    // 子路径部署时得自己拼，否则 favicon 会 404
+    ["link", { rel: "icon", href: `${base}favicon.ico` }],
     ["meta", { name: "theme-color", content: "#3b82f6" }],
     // logo.png 是深蓝描线，暗色档几乎看不见 —— 反白一下（同应用内做法）
     ["style", {}, ".dark .VPImage.logo { filter: brightness(0) invert(1); }"],
