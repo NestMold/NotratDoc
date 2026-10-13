@@ -23,6 +23,8 @@ export default defineConfig({
       { text: "插件开发", link: "/plugin-dev/", activeMatch: "^/plugin-dev/" },
       { text: "平台文档", link: "/platform/", activeMatch: "^/platform/" },
       { text: "更新记录", link: "/changelog/", activeMatch: "^/changelog/" },
+      // 软件官网（下载 / 用户中心 / 激活码兑换都在那边），外链默认新标签打开
+      { text: "官网", link: "https://notrat.cn" },
     ],
 
     sidebar: {
@@ -160,7 +162,8 @@ export default defineConfig({
     socialLinks: [{ icon: "github", link: "https://github.com/Karosown/Notrat" }],
 
     footer: {
-      message: "Notrat · 本地优先的 AI 工作台",
+      message:
+        'Notrat · 本地优先的 AI 工作台　·　<a href="https://notrat.cn" target="_blank" rel="noreferrer">软件官网 notrat.cn</a>',
       copyright: "© 2026 巢墨科技工作室 / NestMold",
     },
   },
