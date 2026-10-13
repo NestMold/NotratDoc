@@ -2,47 +2,12 @@
 layout: home
 title: Notrat 文档
 titleTemplate: 本地优先的 AI 工作台
-
-hero:
-  name: Notrat 文档
-  text: 本地优先的 AI 工作台
-  tagline: 一边是所见即所得的 Markdown 编辑器，一边是能读写文件、执行命令、调用工具的 AI。这里是它的完整说明书。
-  image:
-    src: /logo.png
-    alt: Notrat
-  actions:
-    - theme: brand
-      text: 从安装开始
-      link: /guide/install
-    - theme: alt
-      text: 功能地图
-      link: /guide/
-    - theme: alt
-      text: 插件开发
-      link: /plugin-dev/
-
-features:
-  - icon: 📥
-    title: 第一次用？
-    details: 从下载安装、首次启动引导，到写出第一篇 Markdown —— 三篇走完，十分钟上手。
-    link: /guide/install
-    linkText: 开始使用
-  - icon: 🧭
-    title: 想知道某个功能在哪？
-    details: 工作区、编辑器、AI 对话、专家、连接器、技能、插件、主题、面板、快捷键 —— 每个页面配实机截图逐个讲。
-    link: /guide/
-    linkText: 功能地图
-  - icon: 🔌
-    title: 想给 Notrat 写插件？
-    details: manifest 怎么写、面板怎么挂、MCP 服务器怎么起、怎么打包发布到插件市场。
-    link: /plugin-dev/
-    linkText: 插件开发
-  - icon: 📋
-    title: 这一版改了什么？
-    details: 从 1.2.8 到 1.3.5 的完整更新记录，按版本翻阅。
-    link: /changelog/
-    linkText: 更新记录
 ---
+
+<!-- 首页的 hero 与四张卡由 .vitepress/theme/Home.vue 渲染（原来写在这里的
+     frontmatter hero/features 已搬进去，文案一字未改；emoji 图标换成了内联 SVG）。 -->
+
+<Home />
 
 ## 这份文档包含什么
 
