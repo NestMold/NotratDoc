@@ -6,6 +6,9 @@
 //   --sel          只截该元素（用页面内的坐标换算，元素不存在则整页）
 //   --wait         截图前额外等待毫秒（默认 600）
 const PORT = process.env.INSPECT_PORT || 9230;
+// WIN_URL_FRAG：主进程按 URL 选窗时用的子串（默认抓工作区窗；多窗实例可用它点名别的窗）
+const WIN_FRAG = process.env.WIN_URL_FRAG || "workspace=";
+const WIN_EXACT = process.env.WIN_URL_EXACT || "";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function findWs(tries = 20) {
@@ -93,9 +96,11 @@ const meval = async (expr, timeoutMs = 90000) => {
 const wcId = page.url.includes("workspace=") ? null : null; // 由主进程按 URL 选窗
 await meval(`(function(){
   var E; try { E = require('electron'); } catch (e) { E = process.mainModule.require('electron'); }
-  var w = E.BrowserWindow.getAllWindows().filter(function(x){ return !x.isDestroyed() && (x.webContents.getURL()||'').indexOf('workspace=') >= 0; })[0];
+  var WANT = ${JSON.stringify(WIN_EXACT)}, FRAG = ${JSON.stringify(WIN_FRAG)};
+  var w = E.BrowserWindow.getAllWindows().filter(function(x){ var u = x.webContents.getURL()||''; return !x.isDestroyed() && (WANT ? u === WANT : u.indexOf(FRAG) >= 0); })[0];
   if (!w) return 'no-main-window';
   ${size ? `w.setBounds({ x: 40, y: 40, width: ${size[0]}, height: ${size[1]} });` : ""}
+  try { w.webContents.setZoomFactor(1); } catch (e) {}
   if (!w.isVisible()) w.show();
   return { id: w.id, bounds: w.getBounds(), visible: w.isVisible() };
 })()`);
@@ -120,7 +125,8 @@ if (sel) {
 const res = await meval(`(function(){
   var E; try { E = require('electron'); } catch (e) { E = process.mainModule.require('electron'); }
   var fs = require('fs');
-  var w = E.BrowserWindow.getAllWindows().filter(function(x){ return !x.isDestroyed() && (x.webContents.getURL()||'').indexOf('workspace=') >= 0; })[0];
+  var WANT = ${JSON.stringify(WIN_EXACT)}, FRAG = ${JSON.stringify(WIN_FRAG)};
+  var w = E.BrowserWindow.getAllWindows().filter(function(x){ var u = x.webContents.getURL()||''; return !x.isDestroyed() && (WANT ? u === WANT : u.indexOf(FRAG) >= 0); })[0];
   if (!w) return Promise.resolve({ error: 'no-main-window' });
   var opts = ${clip ? JSON.stringify({ x: Math.round(clip.x), y: Math.round(clip.y), width: Math.round(clip.width), height: Math.round(clip.height) }) : "undefined"};
   return w.webContents.capturePage(opts).then(function(img){

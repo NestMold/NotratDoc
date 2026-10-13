@@ -22,7 +22,9 @@ title: 调试与日志
 | 文件 | `~/.notrat/logs/mcp-servers/<serverId>-YYYY-MM-DD.log` | 事后排查；让用户把文件发给你 |
 | 命令行 | `yarn log tail <插件id>` | 终端与 AI 读取，不用开应用 |
 
-<!-- shot: plugin-dev/pack-log-panel | 插件卡片的「查看日志」：stderr 行 + 生命周期标记，多服务器可切换 -->
+![插件卡片的「查看日志」](/shots/plugin-dev/pack-log-panel.png)
+
+上图是 LaTeX 助手面板的实时日志：`[stderr]` 行是插件服务器往 stderr 写的内容（`console.error` 就是 stderr），`[system]` 行是宿主记的生命周期标记（进程启动 / 连接断开 / 进程停止）；右上角是行数与「复制」「清空」。
 
 （同一块面板也从「上手引导」弹窗里进得去，只是折在里面。）
 
