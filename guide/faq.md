@@ -193,3 +193,17 @@ Windows 上活进程会占住自己的目录导致文件删不掉。Notrat 已�
 3. 官网 `notrat.cn` 提工单
 
 报问题时**带上版本号（状态栏右下角）与当时在做什么**，能省很多来回。
+
+---
+
+## 💬 加入交流群
+
+扫码进群，更新动态、问题反馈、功能讨论都在群里～
+
+<div class="qr-row">
+
+| QQ 交流群 | 微信交流群 |
+| --- | --- |
+| ![Notrat 用户QQ交流群二维码](/images/qq-group.png) | ![Notrat 用户微信交流群二维码](/images/wechat-group.png) |
+
+</div>

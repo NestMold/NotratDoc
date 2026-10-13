@@ -48,3 +48,11 @@ yarn preview    # 预览构建产物
 > 用 Actions 发布时不用在仓库里放 `CNAME` 文件（会被忽略），自定义域名只在 Settings 里配一次即可。
 >
 > Gitee Pages 免费版不跑构建，需要用本地 `yarn build` 的产物去发布；`DOCS_BASE` 按上表填 Gitee 的仓名。
+
+## 💬 加入交流群
+
+扫码进群，更新动态、问题反馈、功能讨论都在群里～
+
+| QQ 交流群 | 微信交流群 |
+| --- | --- |
+| ![Notrat 用户QQ交流群二维码](public/images/qq-group.png) | ![Notrat 用户微信交流群二维码](public/images/wechat-group.png) |

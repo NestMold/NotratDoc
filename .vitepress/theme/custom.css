@@ -535,6 +535,15 @@ html .VPDoc .content-container {
   background: var(--nr-card);
 }
 
+/* ---- 交流群二维码：两张源图尺寸不齐（212×221 / 396×396），
+       统一到同一个框里显示，免得表格一边大一边小；QR 本身不缩放存储，扫不扫得动看原图 ---- */
+.qr-row img {
+  display: block;
+  width: 240px;
+  height: 240px;
+  object-fit: contain;
+}
+
 /* ---- 自定义容器：柔和块 + 大圆角，不画左边框 ---- */
 .vp-doc .custom-block {
   border: none;
