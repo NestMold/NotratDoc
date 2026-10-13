@@ -1,211 +1,294 @@
 /* ==========================================================================
    Notrat 文档站皮肤
-   视觉口径 = 应用内那套「柔填充圆角块」：实心浅底 + 大圆角 + 几乎不画细线。
-   品牌色取应用 theme-minimalist 的 primary hsl(215 95% 55%) ≈ #3b82f6，
-   正文链接档压到 #2563eb（白底 5.17:1，过 AA）。
+   视觉口径 = notrat.cn 官网那套「纸 + 墨 + 荧光笔」：
+     暖纸底（#FAF9F5 再叠一层细颗粒噪点，屏幕上落成 ~#E9E7E4）
+     + 墨字 #1A1A1A / 正文 #55524C + 荧光笔 #F5E6B8 + 黑胶囊按钮
+     + 白卡 24px 圆角。
+   色值全部取自官网真实 token（.landing-root 的 CSS 变量）：
+     --ink #1A1A1A / --ink-2 #55524C / --paper #FAF9F5 / --card #FFFFFF
+     --line #ECE8E0 / --line-2 #D8D3C8 / --hl #F5E6B8 / --r 24px / --rs 16px
+   正文链接另取深藏青 #123A7A（logo 是 #000C3B），在纸底上 10.4:1 过 AAA，
+   与荧光笔黄互不打架。
    ========================================================================== */
 
 :root {
   /* ---- 字体 ---- */
-  --vp-font-family-base: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
-    "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  --vp-font-family-base: "Inter", "Nunito Sans", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", "PingFang SC", "Noto Sans SC", "Hiragino Sans GB", "Microsoft YaHei",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
   --vp-font-family-mono: "JetBrains Mono", "Cascadia Code", "SF Mono", ui-monospace,
     SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
 
-  /* ---- 品牌 ---- */
-  --vp-c-brand-1: #2563eb;
-  --vp-c-brand-2: #3b82f6;
-  --vp-c-brand-3: #3b82f6;
-  --vp-c-brand-soft: rgba(59, 130, 246, 0.12);
+  /* ---- 纸与墨（官网 token 原值） ---- */
+  --nr-paper: #faf9f5;
+  --nr-card: #ffffff;
+  --nr-soft: #f1eee7;
+  --nr-ink: #1a1a1a;
+  --nr-ink-2: #55524c;
+  --nr-ink-3: #6f6b60; /* 官网是 #9B968C，纸底上只有 3:1，文档小字太多，压深到 5.4:1 */
+  --nr-line: #ece8e0;
+  --nr-line-2: #d8d3c8;
+  --nr-hl: #f5e6b8;
+  --nr-link: #123a7a;
 
-  /* ---- 表面 ---- */
-  --vp-c-bg: #ffffff;
-  --vp-c-bg-alt: #f6f8fb;
+  --nr-radius: 24px;
+  --nr-radius-s: 16px;
+  --nr-radius-xs: 10px;
+
+  /* 细颗粒纸纹：feTurbulence 噪点，铺在纸底上把 #FAF9F5 压成屏幕上的暖灰纸面 */
+  --nr-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.38'/%3E%3C/svg%3E");
+
+  --nr-shadow-1: 0 1px 2px rgba(26, 26, 26, 0.04), 0 2px 6px rgba(26, 26, 26, 0.04);
+  --nr-shadow-2: 0 2px 4px rgba(26, 26, 26, 0.04), 0 14px 34px -18px rgba(26, 26, 26, 0.22);
+  --nr-shadow-window: 0 24px 70px rgba(15, 23, 41, 0.12);
+  --nr-ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ---- VitePress 变量映射 ---- */
+  --vp-c-brand-1: #123a7a;
+  --vp-c-brand-2: #1a1a1a;
+  --vp-c-brand-3: #1a1a1a;
+  --vp-c-brand-soft: rgba(245, 230, 184, 0.55); /* 荧光笔淡档：侧边栏选中、info 块 */
+
+  --vp-c-bg: #faf9f5;
+  --vp-c-bg-alt: #f1eee7;
   --vp-c-bg-elv: #ffffff;
-  --vp-c-bg-soft: #f1f4f9;
-  --vp-c-border: #e3e8ef;
-  --vp-c-divider: #ebeff5;
-  --vp-c-gutter: #ebeff5;
+  --vp-c-bg-soft: #f1eee7;
+  --vp-c-border: #e4dfd2;
+  --vp-c-divider: #ece8e0;
+  --vp-c-gutter: #ece8e0;
 
-  /* ---- 文字 ---- */
-  --vp-c-text-1: #16202e;
-  --vp-c-text-2: #4a5768;
-  --vp-c-text-3: #7d8a9c;
+  --vp-c-text-1: #1a1a1a;
+  --vp-c-text-2: #55524c;
+  --vp-c-text-3: #6f6b60;
 
-  /* ---- 中性按钮 ---- */
-  --vp-c-default-1: #eef1f6;
-  --vp-c-default-2: #e6eaf1;
-  --vp-c-default-3: #dbe1ea;
-  --vp-c-default-soft: rgba(120, 135, 158, 0.14);
+  --vp-c-default-1: #f1eee7;
+  --vp-c-default-2: #e9e5da;
+  --vp-c-default-3: #ded9cb;
+  --vp-c-default-soft: rgba(26, 26, 26, 0.06);
 
-  /* ---- 语义色 —— 柔填充，别太怯也别太跳 ---- */
-  --vp-c-tip-1: #0b7a5c;
-  --vp-c-tip-2: #10b981;
-  --vp-c-tip-3: #10b981;
-  --vp-c-tip-soft: rgba(16, 185, 129, 0.1);
-  --vp-c-warning-1: #a15c07;
-  --vp-c-warning-2: #f59e0b;
-  --vp-c-warning-3: #f59e0b;
-  --vp-c-warning-soft: rgba(245, 158, 11, 0.12);
-  --vp-c-danger-1: #b42318;
-  --vp-c-danger-2: #ef4444;
-  --vp-c-danger-3: #ef4444;
-  --vp-c-danger-soft: rgba(239, 68, 68, 0.1);
-  --vp-c-important-1: #6d28d9;
-  --vp-c-important-2: #8b5cf6;
-  --vp-c-important-3: #8b5cf6;
-  --vp-c-important-soft: rgba(139, 92, 246, 0.1);
+  /* ---- 语义色：在暖纸上取柔和但能读的一档 ---- */
+  --vp-c-tip-1: #1d5c43;
+  --vp-c-tip-2: #2f7a5c;
+  --vp-c-tip-3: #2f7a5c;
+  --vp-c-tip-soft: rgba(47, 122, 92, 0.1);
+  --vp-c-warning-1: #7a5310;
+  --vp-c-warning-2: #b98217;
+  --vp-c-warning-3: #b98217;
+  --vp-c-warning-soft: rgba(185, 130, 23, 0.13);
+  --vp-c-danger-1: #96231b;
+  --vp-c-danger-2: #c0392b;
+  --vp-c-danger-3: #c0392b;
+  --vp-c-danger-soft: rgba(192, 57, 43, 0.1);
+  --vp-c-important-1: #4a3a86;
+  --vp-c-important-2: #6b57b5;
+  --vp-c-important-3: #6b57b5;
+  --vp-c-important-soft: rgba(107, 87, 181, 0.1);
 
-  /* ---- 按钮 ---- */
-  --vp-button-brand-bg: #3b82f6;
-  --vp-button-brand-hover-bg: #2563eb;
-  --vp-button-brand-active-bg: #1d4ed8;
+  /* ---- 按钮：黑胶囊 ---- */
+  --vp-button-brand-bg: #1a1a1a;
+  --vp-button-brand-hover-bg: #000000;
+  --vp-button-brand-active-bg: #000000;
   --vp-button-brand-border: transparent;
-  --vp-button-brand-text: #ffffff;
-  --vp-button-alt-bg: #f1f4f9;
-  --vp-button-alt-hover-bg: #e6eaf1;
-  --vp-button-alt-active-bg: #dbe1ea;
-  --vp-button-alt-border: transparent;
-  --vp-button-alt-text: #16202e;
-  --vp-button-alt-hover-text: #16202e;
+  --vp-button-brand-text: #faf9f5;
+  --vp-button-alt-bg: transparent;
+  --vp-button-alt-hover-bg: #f1eee7;
+  --vp-button-alt-active-bg: #e9e5da;
+  --vp-button-alt-border: #d8d3c8;
+  --vp-button-alt-text: #1a1a1a;
+  --vp-button-alt-hover-text: #1a1a1a;
+  --vp-button-alt-hover-border: #1a1a1a;
 
-  /* ---- 代码 ---- */
-  --vp-code-block-bg: #f4f6fa;
-  --vp-code-block-divider-color: #e6eaf1;
-  --vp-code-lang-color: #7d8a9c;
-  --vp-code-line-highlight-color: rgba(59, 130, 246, 0.08);
-  --vp-code-line-number-color: #97a3b4;
-  --vp-code-copy-code-bg: rgba(255, 255, 255, 0.9);
+  /* ---- 代码：素笺纸白（白卡同款，压在纸底上） ---- */
+  --vp-code-block-bg: #ffffff;
+  --vp-code-block-divider-color: #ece8e0;
+  --vp-code-lang-color: #6f6b60;
+  --vp-code-line-highlight-color: rgba(245, 230, 184, 0.45);
+  --vp-code-line-number-color: #a39d8f;
+  --vp-code-copy-code-bg: rgba(241, 238, 231, 0.9);
   --vp-code-copy-code-hover-bg: #ffffff;
-  --vp-code-copy-code-active-text: #16202e;
-  --vp-code-color: #1f2d3d;
-  --vp-code-bg: #eef1f6;
+  --vp-code-copy-code-active-text: #1a1a1a;
+  --vp-code-color: #38414f;
+  --vp-code-bg: #f1eee7;
 
   /* ---- 布局 ---- */
   --vp-layout-max-width: 1440px;
   --vp-sidebar-width: 274px;
+  --vp-nav-height: 62px;
   --nr-content-max: 736px;
-  --nr-radius: 14px;
-  --nr-radius-sm: 10px;
-  --nr-shadow-1: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.04);
-  --nr-shadow-2: 0 8px 24px -12px rgba(16, 38, 74, 0.18);
+
+  --vp-custom-block-font-size: 14.5px;
+  --vp-custom-block-code-font-size: 13px;
 }
 
 .dark {
-  --vp-c-brand-1: #7cb2ff;
-  --vp-c-brand-2: #60a5fa;
-  --vp-c-brand-3: #3b82f6;
-  --vp-c-brand-soft: rgba(96, 165, 250, 0.16);
-
-  --vp-c-bg: #12151b;
-  --vp-c-bg-alt: #0e1116;
-  --vp-c-bg-elv: #171b22;
-  --vp-c-bg-soft: #1b202a;
-  --vp-c-border: #2a3140;
-  --vp-c-divider: #232936;
-  --vp-c-gutter: #232936;
-
-  --vp-c-text-1: #e8edf5;
-  --vp-c-text-2: #a8b3c4;
-  --vp-c-text-3: #747f91;
-
-  --vp-c-default-1: #1f242e;
-  --vp-c-default-2: #262c37;
-  --vp-c-default-3: #2e3540;
-  --vp-c-default-soft: rgba(148, 163, 184, 0.16);
-
-  --vp-c-tip-1: #34d399;
-  --vp-c-tip-soft: rgba(16, 185, 129, 0.14);
-  --vp-c-warning-1: #fbbf24;
-  --vp-c-warning-soft: rgba(245, 158, 11, 0.14);
-  --vp-c-danger-1: #f87171;
-  --vp-c-danger-soft: rgba(239, 68, 68, 0.14);
-  --vp-c-important-1: #a78bfa;
-  --vp-c-important-soft: rgba(139, 92, 246, 0.16);
-
-  --vp-button-brand-bg: #3b82f6;
-  --vp-button-brand-hover-bg: #60a5fa;
-  --vp-button-alt-bg: #1f242e;
-  --vp-button-alt-hover-bg: #262c37;
-  --vp-button-alt-text: #e8edf5;
-  --vp-button-alt-hover-text: #ffffff;
-
-  --vp-code-block-bg: #171b22;
-  --vp-code-block-divider-color: #262c37;
-  --vp-code-copy-code-bg: rgba(255, 255, 255, 0.06);
-  --vp-code-copy-code-hover-bg: rgba(255, 255, 255, 0.12);
-  --vp-code-copy-code-active-text: #e8edf5;
-  --vp-code-color: #d7e0ee;
-  --vp-code-bg: #1f242e;
+  /* 暗档 = 同一种纸的夜里那面：暖炭底 + 米白墨，荧光笔压暗别刺眼 */
+  --nr-paper: #14130f;
+  --nr-card: #1c1b16;
+  --nr-soft: #23221c;
+  --nr-ink: #f3f0e7;
+  --nr-ink-2: #b9b3a5;
+  --nr-ink-3: #918b7d;
+  --nr-line: #2b2921;
+  --nr-line-2: #3a372d;
+  --nr-hl: #6b5c26;
+  --nr-link: #a9c2f2;
 
   --nr-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --nr-shadow-2: 0 10px 30px -14px rgba(0, 0, 0, 0.7);
+  --nr-shadow-2: 0 2px 4px rgba(0, 0, 0, 0.3), 0 16px 34px -20px rgba(0, 0, 0, 0.7);
+  --nr-shadow-window: 0 24px 70px rgba(0, 0, 0, 0.5);
+
+  --vp-c-brand-1: #a9c2f2;
+  --vp-c-brand-2: #f3f0e7;
+  --vp-c-brand-3: #f3f0e7;
+  --vp-c-brand-soft: rgba(245, 230, 184, 0.16);
+
+  --vp-c-bg: #14130f;
+  --vp-c-bg-alt: #1c1b16;
+  --vp-c-bg-elv: #1c1b16;
+  --vp-c-bg-soft: #23221c;
+  --vp-c-border: #34312a;
+  --vp-c-divider: #2b2921;
+  --vp-c-gutter: #2b2921;
+
+  --vp-c-text-1: #f3f0e7;
+  --vp-c-text-2: #b9b3a5;
+  --vp-c-text-3: #918b7d;
+
+  --vp-c-default-1: #23221c;
+  --vp-c-default-2: #2b2921;
+  --vp-c-default-3: #34312a;
+  --vp-c-default-soft: rgba(243, 240, 231, 0.08);
+
+  --vp-c-tip-1: #7fd0ad;
+  --vp-c-tip-soft: rgba(47, 122, 92, 0.2);
+  --vp-c-warning-1: #e5b661;
+  --vp-c-warning-soft: rgba(185, 130, 23, 0.18);
+  --vp-c-danger-1: #f09b93;
+  --vp-c-danger-soft: rgba(192, 57, 43, 0.2);
+  --vp-c-important-1: #b7a8ec;
+  --vp-c-important-soft: rgba(107, 87, 181, 0.2);
+
+  --vp-button-brand-bg: #f3f0e7;
+  --vp-button-brand-hover-bg: #ffffff;
+  --vp-button-brand-active-bg: #ffffff;
+  --vp-button-brand-text: #14130f;
+  --vp-button-alt-bg: transparent;
+  --vp-button-alt-hover-bg: #23221c;
+  --vp-button-alt-active-bg: #2b2921;
+  --vp-button-alt-border: #3a372d;
+  --vp-button-alt-text: #f3f0e7;
+  --vp-button-alt-hover-text: #ffffff;
+  --vp-button-alt-hover-border: #918b7d;
+
+  --vp-code-block-bg: #1c1b16;
+  --vp-code-block-divider-color: #2b2921;
+  --vp-code-copy-code-bg: rgba(243, 240, 231, 0.08);
+  --vp-code-copy-code-hover-bg: rgba(243, 240, 231, 0.14);
+  --vp-code-copy-code-active-text: #f3f0e7;
+  --vp-code-color: #d9d4c6;
+  --vp-code-bg: #23221c;
+}
+
+/* ==========================================================================
+   纸底 + 纸纹
+   ========================================================================== */
+html {
+  background-color: var(--nr-paper);
+  background-image: var(--nr-noise);
+}
+body,
+.Layout,
+.VPDoc,
+.VPFooter {
+  background-color: transparent;
+}
+.dark html,
+html.dark {
+  background-color: var(--nr-paper);
 }
 
 /* ==========================================================================
    焦点环 —— 键盘可达性（全站统一，别被组件自己的 outline:none 吃掉）
    ========================================================================== */
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
-  outline: 2px solid var(--vp-c-brand-2);
+  outline: 2px solid var(--nr-ink);
   outline-offset: 2px;
-  border-radius: var(--nr-radius-sm);
+  border-radius: var(--nr-radius-xs);
 }
 
 /* ==========================================================================
-   导航栏
+   导航栏：62px 纸色条（rgba(250,249,245,.95) + 毛玻璃）
    ========================================================================== */
 .VPNavBar {
-  border-bottom: 1px solid var(--vp-c-divider);
+  border-bottom: 1px solid transparent;
+  background-color: transparent;
 }
-.VPNavBar:not(.has-sidebar):not(.home.top) {
-  background: color-mix(in srgb, var(--vp-c-bg) 86%, transparent);
+.VPNavBar:not(.home.top) {
+  background-color: color-mix(in srgb, var(--nr-paper) 92%, transparent);
+  backdrop-filter: saturate(1.6) blur(12px);
+  border-bottom-color: var(--nr-line);
+}
+.VPNavBar.has-sidebar .curtain {
+  background: var(--nr-paper);
 }
 .VPNavBar .title {
-  font-weight: 650;
+  font-weight: 700;
   letter-spacing: 0.01em;
+  color: var(--nr-ink);
+}
+.VPNavBar .title .logo {
+  margin-right: 9px;
 }
 .VPNavBarMenuLink {
-  border-radius: var(--nr-radius-sm);
-  padding: 0 10px;
+  border-radius: 999px;
+  padding: 0 12px;
   font-weight: 500;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  color: var(--nr-ink-2);
+  transition: color 0.2s var(--nr-ease), background-color 0.2s var(--nr-ease);
 }
 .VPNavBarMenuLink:hover {
-  background: var(--vp-c-bg-soft);
-  color: var(--vp-c-text-1);
+  background: var(--nr-soft);
+  color: var(--nr-ink);
 }
 .VPNavBarMenuLink.active {
-  background: var(--vp-c-brand-soft);
-  color: var(--vp-c-brand-1);
-  font-weight: 600;
+  color: var(--nr-ink);
+  font-weight: 650;
 }
-.VPNavBarAppearance .VPSwitchAppearance,
-.VPNavBarSocialLinks .VPSocialLink {
-  border-radius: var(--nr-radius-sm);
+.VPSwitchAppearance {
+  border-color: var(--nr-line-2);
 }
 
-/* 搜索按钮：柔填充胶囊 */
+/* 搜索按钮：纸上的胶囊，右边挂 Ctrl K */
 .DocSearch-Button,
 .VPNavBarSearch .DocSearch-Button {
   border-radius: 999px;
-  border: 1px solid var(--vp-c-border);
-  background: var(--vp-c-bg-soft);
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+  border: 1px solid var(--nr-line-2);
+  background: transparent;
+  transition: border-color 0.2s var(--nr-ease), background-color 0.2s var(--nr-ease);
 }
 .DocSearch-Button:hover {
-  border-color: var(--vp-c-brand-2);
-  background: var(--vp-c-bg);
+  border-color: var(--nr-ink);
+  background: var(--nr-card);
 }
 .DocSearch-Button .DocSearch-Button-Key {
   border-radius: 6px;
+  border: 1px solid var(--nr-line);
+  background: var(--nr-soft);
+  color: var(--nr-ink-3);
 }
 
 /* ==========================================================================
    侧边栏
    ========================================================================== */
+@media (min-width: 960px) {
+  /* 桌面侧栏铺的是 --vp-c-bg-alt（实心），会在纸纹上切出一条色差缝，直接透出纸底。
+     VitePress 那条规则摸不到出处（CSSOM 里搜不到），只能 !important 压 */
+  .VPSidebar {
+    background-color: transparent !important;
+  }
+}
 .VPSidebar {
-  border-right: 1px solid var(--vp-c-divider);
+  border-right: none;
   padding-top: 26px;
 }
 .VPSidebarItem.level-0 {
@@ -214,37 +297,37 @@
 .VPSidebarItem.level-0 > .item > .text {
   font-size: 12.5px;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  color: var(--vp-c-text-3);
+  letter-spacing: 0.08em;
+  color: var(--nr-ink-3);
 }
 .VPSidebarItem .link:hover .text,
 .VPSidebarItem .item:hover > .text {
-  color: var(--vp-c-text-1);
+  color: var(--nr-ink);
 }
 .VPSidebarItem.level-1 .text,
 .VPSidebarItem.level-2 .text {
   font-size: 14px;
   line-height: 1.5;
   padding: 6px 10px;
-  border-radius: var(--nr-radius-sm);
-  transition: background-color 0.18s ease, color 0.18s ease;
+  border-radius: var(--nr-radius-xs);
+  transition: background-color 0.18s var(--nr-ease), color 0.18s var(--nr-ease);
 }
 .VPSidebarItem.level-1 .link:hover .text,
 .VPSidebarItem.level-2 .link:hover .text {
-  background: var(--vp-c-bg-soft);
+  background: var(--nr-soft);
 }
+/* 选中 = 书上划了一道荧光笔 */
 .VPSidebarItem.is-active > .item > .link > .text {
   background: var(--vp-c-brand-soft);
-  color: var(--vp-c-brand-1);
-  font-weight: 600;
+  color: var(--nr-ink);
+  font-weight: 650;
 }
-/* 默认那条竖线指示器退休（柔填充自己会说话） */
 .VPSidebarItem.is-active > .item .indicator,
 .VPSidebarItem.is-active > .item .link > .indicator {
   display: none;
 }
 .VPSidebarItem.is-link.level-1 > .item > .link > .text {
-  color: var(--vp-c-text-2);
+  color: var(--nr-ink-2);
 }
 
 /* ==========================================================================
@@ -261,9 +344,10 @@ html .VPDoc .content-container {
 
 .vp-doc h1 {
   font-size: 34px;
-  font-weight: 700;
-  letter-spacing: -0.015em;
+  font-weight: 750;
+  letter-spacing: -0.02em;
   line-height: 1.28;
+  color: var(--nr-ink);
   border-bottom: none;
   padding-bottom: 0;
   margin-bottom: 12px;
@@ -272,59 +356,70 @@ html .VPDoc .content-container {
   font-size: 25px;
   font-weight: 700;
   letter-spacing: -0.01em;
+  color: var(--nr-ink);
   border-top: none;
   padding-top: 0;
   margin-top: 52px;
   margin-bottom: 14px;
 }
-/* 与首页标题下那道色条同源的小母题（纯装饰，不参与朗读） */
+/* 标题前那道荧光笔短划 —— 官网 mark 的迷你版 */
 .vp-doc h2::before {
   content: "";
   display: inline-block;
-  width: 4px;
-  height: 0.62em;
-  border-radius: 2px;
-  background: var(--vp-c-brand-2);
-  margin-right: 10px;
-  vertical-align: -0.06em;
+  width: 24px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--nr-hl);
+  margin-right: 12px;
+  vertical-align: 0.12em;
 }
 .vp-doc h3 {
   font-size: 19px;
-  font-weight: 650;
+  font-weight: 700;
+  color: var(--nr-ink);
   margin-top: 36px;
 }
 .vp-doc h4 {
   font-size: 16px;
-  font-weight: 650;
+  font-weight: 700;
+  color: var(--nr-ink);
 }
 .vp-doc p,
 .vp-doc li {
   font-size: 15.5px;
   line-height: 1.85;
-  color: var(--vp-c-text-1);
+  color: var(--nr-ink-2);
 }
 .vp-doc p {
   margin: 14px 0;
 }
-.vp-doc strong {
-  font-weight: 650;
-  color: var(--vp-c-text-1);
+.vp-doc li strong,
+.vp-doc p strong {
+  font-weight: 700;
+  color: var(--nr-ink);
+}
+/* 荧光笔：官网就是这一条 —— 下 38% 一道黄带 */
+.vp-doc mark {
+  background: linear-gradient(rgba(0, 0, 0, 0) 62%, var(--nr-hl) 62%);
+  color: inherit;
+  padding: 0 2px;
 }
 .vp-doc a {
+  color: var(--nr-link);
   font-weight: 500;
   text-decoration: none;
-  border-bottom: 1px solid color-mix(in srgb, var(--vp-c-brand-1) 35%, transparent);
-  transition: border-color 0.2s ease, color 0.2s ease;
+  border-bottom: 1px solid color-mix(in srgb, var(--nr-link) 30%, transparent);
+  transition: border-color 0.2s var(--nr-ease), background-color 0.2s var(--nr-ease);
 }
 .vp-doc a:hover {
-  border-bottom-color: var(--vp-c-brand-1);
+  border-bottom-color: var(--nr-link);
+  background-image: linear-gradient(rgba(0, 0, 0, 0) 68%, var(--nr-hl) 68%);
 }
 .vp-doc hr {
-  border-top: 1px solid var(--vp-c-divider);
+  border-top: 1px solid var(--nr-line);
   margin: 40px 0;
 }
 
-/* 列表：留白与圆点对齐 */
 .vp-doc ul,
 .vp-doc ol {
   padding-left: 1.35em;
@@ -333,62 +428,69 @@ html .VPDoc .content-container {
   margin-top: 6px;
 }
 .vp-doc li::marker {
-  color: var(--vp-c-text-3);
+  color: var(--nr-ink-3);
 }
 
-/* 引用块：柔填充 + 品牌色小竖条 */
+/* 引用块：纸上的一段加粗行 */
 .vp-doc blockquote {
-  border-left: 3px solid var(--vp-c-brand-2);
-  border-radius: var(--nr-radius-sm);
-  background: var(--vp-c-bg-soft);
+  border-left: 3px solid var(--nr-hl);
+  border-radius: 0 var(--nr-radius-xs) var(--nr-radius-xs) 0;
+  background: color-mix(in srgb, var(--nr-card) 70%, transparent);
   padding: 12px 18px;
   margin: 20px 0;
 }
 .vp-doc blockquote > p {
-  color: var(--vp-c-text-2);
+  color: var(--nr-ink-2);
   font-size: 15px;
 }
 
-/* ---- 表格：圆角容器 + 柔填充表头 ---- */
+/* ---- 表格：白卡 + 圆角（宽度跟着内容走，别撑出一条空白的白板） ---- */
 .vp-doc table {
   display: block;
+  width: fit-content;
+  max-width: 100%;
   overflow-x: auto;
-  border: 1px solid var(--vp-c-border);
-  border-radius: var(--nr-radius);
+  border: 1px solid var(--nr-line);
+  border-radius: var(--nr-radius-s);
   border-collapse: separate;
   border-spacing: 0;
   margin: 22px 0;
   font-size: 14.5px;
+  background: var(--nr-card);
 }
 .vp-doc tr {
   background: transparent;
   border-top: none;
 }
 .vp-doc tr + tr td {
-  border-top: 1px solid var(--vp-c-divider);
+  border-top: 1px solid var(--nr-line);
 }
 .vp-doc th {
-  background: var(--vp-c-bg-soft);
-  color: var(--vp-c-text-2);
+  background: var(--nr-soft);
+  color: var(--nr-ink-2);
   font-size: 13px;
-  font-weight: 650;
+  font-weight: 700;
   letter-spacing: 0.02em;
-  padding: 11px 16px;
+  padding: 12px 16px;
   border: none;
   text-align: left;
   white-space: nowrap;
 }
 .vp-doc td {
-  padding: 11px 16px;
+  padding: 12px 16px;
   border: none;
   line-height: 1.7;
   vertical-align: top;
+  /* 单元格的 max-content 封顶：不封的话，长中文列会把表宽吃干，
+     短列（日期 / 版本 / 链接）被压到折行（实测 2026-10-05 会断成两行）。
+     封顶后长列自己折、短列拿满自己的宽度，整张表也正好缩成贴内容的白卡。 */
+  max-width: 30em;
 }
 .vp-doc td:first-child {
-  color: var(--vp-c-text-1);
+  color: var(--nr-ink);
 }
 .vp-doc tr:hover td {
-  background: color-mix(in srgb, var(--vp-c-bg-soft) 55%, transparent);
+  background: color-mix(in srgb, var(--nr-soft) 55%, transparent);
 }
 
 /* ---- 行内代码 ---- */
@@ -397,58 +499,60 @@ html .VPDoc .content-container {
   padding: 2.5px 6px;
   font-size: 0.875em;
   font-weight: 500;
-  background: var(--vp-c-bg-soft);
+  background: var(--vp-code-bg);
   color: var(--vp-code-color);
-  border: 1px solid color-mix(in srgb, var(--vp-c-border) 60%, transparent);
+  border: 1px solid var(--nr-line);
 }
 
-/* ---- 代码块 ---- */
+/* ---- 代码块：白卡，和表格同一张纸 ---- */
 .vp-doc div[class*="language-"] {
-  border-radius: var(--nr-radius);
-  border: 1px solid var(--vp-c-border);
+  border-radius: var(--nr-radius-s);
+  border: 1px solid var(--nr-line);
   margin: 20px 0;
+  box-shadow: var(--nr-shadow-1);
 }
 .vp-doc div[class*="language-"] pre {
-  border-radius: var(--nr-radius);
+  border-radius: var(--nr-radius-s);
 }
 .vp-doc [class*="language-"] > span.lang {
-  color: var(--vp-c-text-3);
+  color: var(--nr-ink-3);
   font-size: 12px;
   letter-spacing: 0.04em;
 }
 .vp-doc [class*="language-"] > button.copy {
   border-radius: 8px;
-  border: 1px solid var(--vp-c-border);
+  border: 1px solid var(--nr-line);
 }
 .vp-doc .line-numbers-wrapper {
-  border-right: 1px solid var(--vp-c-divider);
+  border-right: 1px solid var(--nr-line);
 }
 
-/* ---- 图片（教程截图）：圆角 + 极浅描边，跟纸面贴合 ---- */
+/* ---- 图片（教程截图）：白卡同款描边 + 圆角 ---- */
 .vp-doc img {
-  border-radius: var(--nr-radius);
-  border: 1px solid var(--vp-c-border);
+  border-radius: var(--nr-radius-s);
+  border: 1px solid var(--nr-line);
   box-shadow: var(--nr-shadow-1);
-  background: var(--vp-c-bg);
+  background: var(--nr-card);
 }
 
-/* ---- 自定义容器：一律柔填充圆角块，不画左边框 ---- */
+/* ---- 自定义容器：柔和块 + 大圆角，不画左边框 ---- */
 .vp-doc .custom-block {
   border: none;
-  border-radius: var(--nr-radius);
+  border-radius: var(--nr-radius-s);
   padding: 16px 20px;
   margin: 20px 0;
   font-size: 14.5px;
   line-height: 1.75;
 }
 .vp-doc .custom-block .custom-block-title {
-  font-weight: 650;
+  font-weight: 700;
   font-size: 14.5px;
   margin-bottom: 6px;
 }
 .vp-doc .custom-block p {
   font-size: 14.5px;
   margin: 8px 0;
+  color: var(--nr-ink-2);
 }
 .vp-doc .custom-block.tip {
   background: var(--vp-c-tip-soft);
@@ -474,10 +578,11 @@ html .VPDoc .content-container {
 }
 .vp-doc .custom-block.info .custom-block-title,
 .vp-doc .custom-block.important .custom-block-title {
-  color: var(--vp-c-brand-1);
+  color: var(--nr-ink);
 }
 .vp-doc .custom-block.details {
-  background: var(--vp-c-bg-soft);
+  background: var(--nr-card);
+  border: 1px solid var(--nr-line);
 }
 
 /* ==========================================================================
@@ -486,17 +591,19 @@ html .VPDoc .content-container {
 .VPDocAsideOutline .outline-title {
   font-size: 12.5px;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  color: var(--vp-c-text-3);
+  letter-spacing: 0.08em;
+  color: var(--nr-ink-3);
 }
 .VPDocAsideOutline .outline-link {
   padding: 4px 0;
   font-size: 13.5px;
   line-height: 1.6;
+  color: var(--nr-ink-2);
 }
 .VPDocAsideOutline .outline-link:hover,
 .VPDocAsideOutline .outline-link.active {
-  color: var(--vp-c-brand-1);
+  color: var(--nr-ink);
+  font-weight: 600;
 }
 
 /* ==========================================================================
@@ -506,52 +613,73 @@ html .VPDoc .content-container {
   margin-top: 56px;
 }
 .VPDocFooter .prev-next {
-  border-top: 1px solid var(--vp-c-divider);
+  border-top: 1px solid var(--nr-line);
 }
 .pager-link {
-  border: 1px solid var(--vp-c-border);
-  border-radius: var(--nr-radius);
-  background: var(--vp-c-bg-soft);
+  border: 1px solid var(--nr-line);
+  border-radius: var(--nr-radius-s);
+  background: color-mix(in srgb, var(--nr-card) 65%, transparent);
   padding: 14px 18px;
-  transition: border-color 0.2s ease, background-color 0.2s ease,
-    transform 0.2s ease;
+  transition: border-color 0.2s var(--nr-ease), background-color 0.2s var(--nr-ease),
+    transform 0.2s var(--nr-ease);
 }
 .pager-link:hover {
-  border-color: var(--vp-c-brand-2);
-  background: var(--vp-c-bg);
+  border-color: var(--nr-line-2);
+  background: var(--nr-card);
   transform: translateY(-1px);
 }
 .pager-link .desc {
   font-size: 12.5px;
-  color: var(--vp-c-text-3);
+  color: var(--nr-ink-3);
 }
 .pager-link .title {
-  color: var(--vp-c-brand-1);
-  font-weight: 600;
+  color: var(--nr-ink);
+  font-weight: 650;
 }
 .VPFooter {
-  border-top: 1px solid var(--vp-c-divider);
-  background: var(--vp-c-bg-alt);
+  border-top: 1px solid var(--nr-line);
 }
 .VPFooter .message,
 .VPFooter .copyright {
   font-size: 13px;
-  color: var(--vp-c-text-3);
+  color: var(--nr-ink-3);
+}
+
+/* ==========================================================================
+   按钮（markdown 里的 VPButton / hero）
+   ========================================================================== */
+.VPButton {
+  border-radius: 999px;
+  height: 44px;
+  padding: 0 24px;
+  font-weight: 600;
+  font-size: 14.5px;
+  transition: background-color 0.2s var(--nr-ease), border-color 0.2s var(--nr-ease),
+    transform 0.2s var(--nr-ease);
+}
+.VPButton.brand:hover,
+.VPButton.alt:hover {
+  transform: translateY(-1px);
 }
 
 /* ==========================================================================
    本地搜索弹窗
    ========================================================================== */
 .VPLocalSearchBox .shell {
-  border-radius: var(--nr-radius);
-  border: 1px solid var(--vp-c-border);
-  box-shadow: var(--nr-shadow-2);
+  border-radius: var(--nr-radius-s);
+  border: 1px solid var(--nr-line);
+  box-shadow: var(--nr-shadow-window);
+  background: var(--nr-card);
 }
 .VPLocalSearchBox .search-bar {
-  border-radius: var(--nr-radius-sm);
+  border-radius: var(--nr-radius-xs);
 }
 .VPLocalSearchBox .result {
-  border-radius: var(--nr-radius-sm);
+  border-radius: var(--nr-radius-xs);
+}
+.VPLocalSearchBox .result.selected {
+  background: var(--vp-c-brand-soft);
+  color: var(--nr-ink);
 }
 
 /* ==========================================================================
@@ -559,10 +687,11 @@ html .VPDoc .content-container {
    ========================================================================== */
 .nr-home {
   margin: 0 auto;
-  max-width: 1120px;
+  max-width: 1080px;
 }
 
-/* 首页在 vp-doc 容器里，先把文档排版规则挡住 */
+/* 首页在 vp-doc 容器里，先把文档排版规则挡住
+   （.vp-doc a 是 (0,2,1)，比单类 (0,1,0) 高，所以下面带颜色的规则都要挂 .vp-doc .nr-home） */
 .vp-doc .nr-home h1,
 .vp-doc .nr-home h3 {
   border-bottom: none;
@@ -571,88 +700,136 @@ html .VPDoc .content-container {
 }
 .vp-doc .nr-home a {
   border-bottom: none;
+  color: inherit;
+}
+.vp-doc .nr-home a:hover {
+  background-image: none;
+}
+.vp-doc .nr-home .nr-card-link,
+.vp-doc .nr-home .nr-btn {
+  color: var(--nr-ink);
+}
+.vp-doc .nr-home .nr-btn-brand {
+  color: var(--nr-paper);
+}
+.vp-doc .nr-home .nr-hero .nr-title mark {
+  background: linear-gradient(rgba(0, 0, 0, 0) 58%, var(--nr-hl) 58%);
 }
 
-/* ---- Hero ---- */
+/* ---- Hero：居中，官网那一版 ---- */
 .nr-hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
-  gap: 48px;
-  align-items: center;
-  padding: 40px 0 56px;
+  position: relative;
+  text-align: center;
+  /* overflow 是为了把背后那行超宽水印裁掉（否则窄屏会被它顶出横向滚动条）；
+     左右各留 4px，别把搜索框的焦点环切了 */
+  overflow: hidden;
+  padding: 64px 4px 10px;
 }
-.nr-lockup {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 14px;
-  font-weight: 650;
+/* 背后那行巨大的 NOTRAT 水印（官网同款母题） */
+.nr-hero::before {
+  content: "NOTRAT";
+  position: absolute;
+  left: 50%;
+  top: 320px;
+  transform: translateX(-50%);
+  font-size: clamp(140px, 26vw, 300px);
+  font-weight: 800;
   letter-spacing: 0.02em;
-  color: var(--vp-c-text-2);
+  line-height: 1;
+  color: rgba(26, 26, 26, 0.04);
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
+.dark .nr-hero::before {
+  color: rgba(243, 240, 231, 0.05);
+}
+.nr-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.nr-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--nr-ink);
 }
 .nr-logo {
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   border: none !important;
-  border-radius: 8px !important;
+  border-radius: 10px !important;
   box-shadow: none !important;
   background: transparent !important;
 }
 .dark .nr-logo {
   filter: brightness(0) invert(1);
 }
+
 .nr-title {
-  font-size: clamp(34px, 4.4vw, 50px) !important;
+  font-size: clamp(30px, 4.2vw, 46px) !important;
   font-weight: 800 !important;
-  line-height: 1.16 !important;
-  letter-spacing: -0.025em;
-  color: var(--vp-c-text-1);
-  margin-top: 18px !important;
+  line-height: 1.24 !important;
+  letter-spacing: -0.03em;
+  color: var(--nr-ink);
+  margin-top: 26px !important;
+  text-wrap: balance;
 }
-.nr-title::after {
-  content: "";
-  display: block;
-  width: 56px;
-  height: 5px;
-  border-radius: 999px;
-  background: var(--vp-c-brand-2);
-  margin-top: 20px;
-}
-.nr-tagline {
-  margin: 22px 0 0;
-  font-size: 16px;
-  line-height: 1.85;
-  color: var(--vp-c-text-2);
-  max-width: 34em;
+/* 荧光笔：只抹到字的下 38%，像真的划了一道 */
+.nr-title mark {
+  background: linear-gradient(rgba(0, 0, 0, 0) 58%, var(--nr-hl) 58%);
+  color: inherit;
+  padding: 0 3px;
 }
 
-/* 搜索框：柔填充胶囊，点开的是导航栏那套本地搜索 */
+.nr-sub {
+  margin: 22px auto 0;
+  max-width: min(100%, 780px);
+  font-size: 17px;
+  line-height: 1.75;
+  color: var(--nr-ink-2);
+  text-wrap: balance;
+}
+.nr-lead {
+  margin: 12px auto 0;
+  max-width: min(100%, 800px);
+  font-size: 14.5px;
+  line-height: 1.8;
+  color: var(--nr-ink-3);
+  text-wrap: balance;
+}
+
+/* 搜索框：纸上的大胶囊，点开的是导航栏那套本地搜索 */
 .nr-search {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   width: 100%;
-  max-width: 420px;
-  margin-top: 28px;
-  padding: 11px 14px;
-  border: 1px solid var(--vp-c-border);
+  max-width: 520px;
+  margin: 30px auto 0;
+  padding: 15px 20px;
+  border: 1px solid var(--nr-line-2);
   border-radius: 999px;
-  background: var(--vp-c-bg-soft);
-  color: var(--vp-c-text-3);
-  font-size: 14px;
+  background: color-mix(in srgb, var(--nr-card) 72%, transparent);
+  color: var(--nr-ink-3);
+  font-size: 15px;
   font-family: inherit;
   cursor: pointer;
-  transition: border-color 0.2s ease, background-color 0.2s ease,
-    box-shadow 0.2s ease;
+  transition: border-color 0.2s var(--nr-ease), background-color 0.2s var(--nr-ease),
+    box-shadow 0.2s var(--nr-ease);
 }
 .nr-search:hover {
-  border-color: var(--vp-c-brand-2);
-  background: var(--vp-c-bg);
+  border-color: var(--nr-ink);
+  background: var(--nr-card);
   box-shadow: var(--nr-shadow-1);
 }
 .nr-search svg {
-  width: 17px;
-  height: 17px;
+  width: 18px;
+  height: 18px;
   flex: none;
   fill: none;
   stroke: currentColor;
@@ -665,91 +842,123 @@ html .VPDoc .content-container {
 }
 .nr-search kbd {
   font-family: var(--vp-font-family-mono);
-  font-size: 11px;
-  padding: 3px 7px;
-  border-radius: 6px;
-  border: 1px solid var(--vp-c-border);
-  background: var(--vp-c-bg);
-  color: var(--vp-c-text-3);
+  font-size: 11.5px;
+  padding: 4px 8px;
+  border-radius: 7px;
+  border: 1px solid var(--nr-line);
+  background: var(--nr-card);
+  color: var(--nr-ink-3);
 }
 
 .nr-actions {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 12px;
-  margin-top: 28px;
+  margin-top: 22px;
 }
 .nr-btn {
   display: inline-flex;
   align-items: center;
-  height: 42px;
-  padding: 0 22px;
-  border-radius: var(--nr-radius-sm);
-  background: var(--vp-c-default-1);
-  color: var(--vp-c-text-1);
+  height: 44px;
+  padding: 0 24px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--nr-ink);
   font-size: 14.5px;
   font-weight: 600;
-  transition: background-color 0.2s ease, transform 0.2s ease,
-    box-shadow 0.2s ease;
+  transition: background-color 0.2s var(--nr-ease), border-color 0.2s var(--nr-ease),
+    color 0.2s var(--nr-ease), transform 0.2s var(--nr-ease);
 }
-.nr-btn:hover {
-  background: var(--vp-c-default-2);
-  transform: translateY(-1px);
+.nr-btn-ghost {
+  border-color: var(--nr-line-2);
 }
+.nr-btn-ghost:hover {
+  border-color: var(--nr-ink);
+  background: color-mix(in srgb, var(--nr-card) 70%, transparent);
+}
+/* 黑胶囊 —— 官网那颗 */
 .nr-btn-brand {
-  background: var(--vp-c-brand-3);
-  color: #fff;
-  box-shadow: 0 6px 16px -8px rgba(37, 99, 235, 0.7);
+  background: var(--nr-ink);
+  color: var(--nr-paper);
+}
+.dark .nr-btn-brand {
+  background: var(--nr-ink);
+  color: #14130f;
 }
 .nr-btn-brand:hover {
-  background: var(--vp-c-brand-1);
-  color: #fff;
+  background: #000;
+  transform: translateY(-1px);
 }
 
-/* 实机截图：柔填充相框，不搞透视花活 */
-.nr-hero-visual {
-  position: relative;
+.nr-meta {
+  margin: 20px auto 0;
+  font-size: 13px;
+  color: var(--nr-ink-3);
+  letter-spacing: 0.01em;
 }
-.nr-hero-visual img {
+.nr-meta .sep {
+  margin: 0 8px;
+  opacity: 0.55;
+}
+
+/* ---- 产品窗：一张真机截图钉在纸面上 ---- */
+.nr-window {
+  margin: 46px auto 0;
+}
+.nr-window img {
   width: 100%;
   display: block;
-  border-radius: 16px;
-  border: 1px solid var(--vp-c-border) !important;
-  box-shadow: var(--nr-shadow-2);
-  background: var(--vp-c-bg);
+  border-radius: var(--nr-radius) var(--nr-radius) 0 0;
+  border: 1px solid var(--nr-line-2) !important;
+  border-bottom: none;
+  box-shadow: var(--nr-shadow-window);
+  background: var(--nr-card);
+}
+.nr-window-cap {
+  margin: 0;
+  padding: 14px 4px 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--nr-ink-3);
+  text-align: center;
 }
 
-/* ---- 四张功能卡 ---- */
-.nr-features {
+/* ---- 四张白卡 ---- */
+.nr-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(232px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 16px;
+  margin-top: 56px;
   padding-bottom: 8px;
 }
 .nr-card {
   display: flex;
   flex-direction: column;
-  padding: 22px 20px 18px;
+  padding: 24px 22px 22px;
   border-radius: var(--nr-radius);
-  background: var(--vp-c-bg-soft);
-  border: 1px solid transparent;
-  transition: border-color 0.2s ease, background-color 0.2s ease,
-    transform 0.2s ease, box-shadow 0.2s ease;
+  background: var(--nr-card);
+  border: 1px solid var(--nr-line);
+  transition: border-color 0.22s var(--nr-ease), box-shadow 0.22s var(--nr-ease),
+    transform 0.22s var(--nr-ease);
 }
 .nr-card:hover {
-  background: var(--vp-c-bg);
-  border-color: var(--vp-c-border);
-  transform: translateY(-3px);
+  border-color: var(--nr-line-2);
+  transform: translateY(-2px);
   box-shadow: var(--nr-shadow-2);
 }
 .nr-card-icon {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-radius: 12px;
-  background: var(--vp-c-brand-soft);
-  color: var(--vp-c-brand-1);
+  background: var(--nr-soft);
+  color: var(--nr-ink);
+}
+.nr-card:hover .nr-card-icon {
+  background: var(--nr-hl);
 }
 .nr-card-icon svg {
   width: 21px;
@@ -758,47 +967,49 @@ html .VPDoc .content-container {
 .nr-card h3 {
   font-size: 16.5px !important;
   font-weight: 700 !important;
-  color: var(--vp-c-text-1);
-  margin: 14px 0 0 !important;
+  color: var(--nr-ink);
+  margin: 16px 0 0 !important;
+  letter-spacing: -0.01em;
 }
 .nr-card p {
-  margin: 8px 0 0;
+  margin: 9px 0 0;
   font-size: 13.8px;
   line-height: 1.75;
-  color: var(--vp-c-text-2);
+  color: var(--nr-ink-2);
   flex: 1;
 }
 .nr-card-link {
-  margin-top: 14px;
+  margin-top: 16px;
   font-size: 13.5px;
-  font-weight: 600;
-  color: var(--vp-c-brand-1);
+  font-weight: 650;
+  color: var(--nr-ink);
 }
 .nr-card-link::after {
-  content: " →";
-  transition: transform 0.2s ease;
+  content: " ↗";
   display: inline-block;
+  transition: transform 0.2s var(--nr-ease);
 }
 .nr-card:hover .nr-card-link::after {
-  transform: translateX(3px);
+  transform: translate(2px, -2px);
 }
 
-/* 首页正文那几段（表格 / tip）跟着页面一起收窄一点 */
+/* 首页正文那几段跟着一起收窄 */
 .vp-doc .nr-home ~ * {
-  max-width: 1120px;
+  max-width: 1080px;
 }
 
 @media (max-width: 960px) {
   .nr-hero {
-    grid-template-columns: 1fr;
-    gap: 32px;
-    padding-top: 20px;
+    padding-top: 36px;
   }
-  .nr-hero-visual {
-    order: -1;
+  .nr-hero::before {
+    top: 240px;
   }
-  .nr-title::after {
-    margin-top: 16px;
+  .nr-title {
+    letter-spacing: -0.02em;
+  }
+  .nr-window {
+    margin-top: 32px;
   }
 }
 
@@ -812,7 +1023,8 @@ html .VPDoc .content-container {
   }
   .nr-card:hover,
   .nr-btn:hover,
-  .pager-link:hover {
+  .pager-link:hover,
+  .VPButton:hover {
     transform: none;
   }
 }

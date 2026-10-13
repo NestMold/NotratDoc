@@ -1,15 +1,20 @@
 <script setup>
 /**
  * 首页（VitePress home 布局下由 index.md 里的 <Home /> 挂载）。
- * 视觉口径 = 应用内那套「柔填充圆角块」：实心浅底 + 大圆角 + 无细线描边。
- * 文案沿用原 frontmatter 的 hero / features，一字未改，只换了排版与图标（图标一律内联 SVG，不用 emoji）。
+ * 版式与配色照 notrat.cn 官网：居中 hero + 荧光笔大标题 + 黑胶囊按钮 +
+ * 真机截图当产品窗 + 白卡（24px 圆角）。文案取官网口径：
+ *   h1   「AI 是你的搭子，拿主意的永远是你。」（后半句划荧光笔）
+ *   副行 「写文档、问 AI、跑命令、建知识图谱——一个窗口闭环。文件即工作区，数据存本机。」
+ *   图注 「一个窗口里，把活干完」
+ * 四张卡的标题与描述仍用文档站原来那版（讲的是「去哪一章」），一字未改。
+ * 图标一律内联 SVG，不用 emoji。
  */
 import { withBase } from "vitepress";
 
 const actions = [
-  { text: "从安装开始", link: "/guide/install", brand: true },
-  { text: "功能地图", link: "/guide/", brand: false },
-  { text: "插件开发", link: "/plugin-dev/", brand: false },
+  { text: "从安装开始", link: "/guide/install", kind: "nr-btn-brand" },
+  { text: "功能地图", link: "/guide/", kind: "nr-btn-ghost" },
+  { text: "插件开发", link: "/plugin-dev/", kind: "nr-btn-ghost" },
 ];
 
 const ICONS = {
@@ -80,47 +85,59 @@ function openSearch() {
 <template>
   <div class="nr-home">
     <section class="nr-hero">
-      <div class="nr-hero-copy">
-        <div class="nr-lockup">
-          <img :src="withBase('/logo.png')" alt="Notrat" class="nr-logo" />
-          <span>Notrat 文档</span>
-        </div>
-        <h1 class="nr-title">本地优先的 AI 工作台</h1>
-        <p class="nr-tagline">
-          一边是所见即所得的 Markdown 编辑器，一边是能读写文件、执行命令、调用工具的
-          AI。这里是它的完整说明书。
-        </p>
-
-        <button type="button" class="nr-search" @click="openSearch">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="11" cy="11" r="6.5" />
-            <path d="m16 16 4 4" />
-          </svg>
-          <span>搜索文档…</span>
-          <kbd>Ctrl K</kbd>
-        </button>
-
-        <div class="nr-actions">
-          <a
-            v-for="a in actions"
-            :key="a.link"
-            class="nr-btn"
-            :class="{ 'nr-btn-brand': a.brand }"
-            :href="withBase(a.link)"
-            >{{ a.text }}</a
-          >
-        </div>
+      <div class="nr-lockup">
+        <img :src="withBase('/logo.png')" alt="Notrat" class="nr-logo" />
+        <span>Notrat 文档</span>
       </div>
 
-      <div class="nr-hero-visual">
-        <img
-          :src="withBase('/shots/guide/interface-overview.png')"
-          alt="Notrat 主界面"
-        />
+      <h1 class="nr-title">
+        AI 是你的搭子，<mark>拿主意的永远是你</mark>。
+      </h1>
+
+      <p class="nr-sub">
+        写文档、问 AI、跑命令、建知识图谱——一个窗口闭环。文件即工作区，数据存本机。
+      </p>
+      <p class="nr-lead">
+        这一册教你把 Notrat 用透：从装好第一次打开，到写出第一个插件，每个页面配实机截图。
+      </p>
+
+      <button type="button" class="nr-search" @click="openSearch">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="11" cy="11" r="6.5" />
+          <path d="m16 16 4 4" />
+        </svg>
+        <span>搜索文档…</span>
+        <kbd>Ctrl K</kbd>
+      </button>
+
+      <div class="nr-actions">
+        <a
+          v-for="a in actions"
+          :key="a.link"
+          class="nr-btn"
+          :class="a.kind"
+          :href="withBase(a.link)"
+          >{{ a.text }}</a
+        >
       </div>
+
+      <p class="nr-meta">
+        教程对应 1.3.5<span class="sep">·</span>使用教程 26
+        篇<span class="sep">·</span>Windows 10+ / macOS 12+ / Linux
+      </p>
     </section>
 
-    <section class="nr-features">
+    <section class="nr-window">
+      <img
+        :src="withBase('/shots/guide/interface-overview.png')"
+        alt="Notrat 主界面：文件树、编辑器与 AI 对话在同一屏"
+      />
+      <p class="nr-window-cap">
+        一个窗口里，把活干完 —— 文件、对话、终端、Agent 在同一处协作。
+      </p>
+    </section>
+
+    <section class="nr-cards">
       <a
         v-for="f in features"
         :key="f.link"
