@@ -4,7 +4,7 @@ title: 调试与日志
 
 # 调试与日志
 
-插件的调试面很窄，但都很实在：**组件的错误在应用里看得见（错误卡片），服务器的输出在 stderr 里**。这一页把「去哪儿看、怎么看、看到的东西什么意思」串起来。
+插件的调试面很窄：组件的错误在应用里看得见（错误卡片），服务器的输出在 stderr 里。
 
 ## 先记住三条
 
@@ -56,7 +56,7 @@ yarn log main --level error        # 主进程日志
 - 只读，不改任何文件。
 
 ::: tip 第三方插件的日志只在本机
-第三方插件与用户自配服务器的启动失败、运行报错**只落本机**（含 `~/.notrat/logs/error-reports.json` 里的本地记录），不会上传到服务器——stderr 里可能带凭据，这是有意为之。
+第三方插件与用户自配服务器的启动失败、运行报错**只落本机**（含 `~/.notrat/logs/error-reports.json` 里的本地记录），不会上传到服务器，stderr 里可能带凭据，这是有意为之。
 
 反过来说：**别把令牌、密钥、用户隐私打进 `console.error`**，日志在用户机器上是明文。要让用户帮你排查，请让对方用面板「复制」或把日志文件发你。
 :::
@@ -82,7 +82,7 @@ node scripts/plugin-panel-check.mjs --list tool-output.txt
 
 **退出码**：`0` = 全部通过；`1` = 有失败项。改到 0 再装机，这一步能省掉绝大多数来回。
 
-模块映射与应用内一致（`react` / `react-dom` / `lucide-react` / 四个 `@/` 模块）；其中 `react-dom` 与三个 `@/` 模块是**替身**（空对象或简单拼接），真实行为仍需装进应用验证——用到替身时脚本会打一行 `ℹ` 提示。**列外模块直接报错**（应用内同样会抛）。
+模块映射与应用内一致（`react` / `react-dom` / `lucide-react` / 四个 `@/` 模块）；其中 `react-dom` 与三个 `@/` 模块是**替身**（空对象或简单拼接），真实行为仍需装进应用验证，用到替身时脚本会打一行 `ℹ` 提示。**列外模块直接报错**（应用内同样会抛）。
 
 ## 常见错误对照表
 
@@ -106,11 +106,11 @@ node scripts/plugin-panel-check.mjs --list tool-output.txt
 
 | 报错 | 含义 |
 | --- | --- |
-| `Authentication failed (401/403)` | 密钥或 Token 无效——检查插件设置里的密钥 |
-| `Endpoint not found (404)` | 地址不对——检查 URL 是否完整、是否变更 |
-| `Method Not Allowed (405)` | 接口形式变了——检查路径是否需要调整（比如漏了 `/mcp`） |
+| `Authentication failed (401/403)` | 密钥或 Token 无效，检查插件设置里的密钥 |
+| `Endpoint not found (404)` | 地址不对，检查 URL 是否完整、是否变更 |
+| `Method Not Allowed (405)` | 接口形式变了，检查路径是否需要调整（比如漏了 `/mcp`） |
 | `Server error (5xx)` | 对方服务器临时故障，稍后重试 |
-| `HTTP connection failed` | 连不上——检查网络与地址 |
+| `HTTP connection failed` | 连不上，检查网络与地址 |
 
 ### 开发阶段
 
@@ -118,12 +118,12 @@ node scripts/plugin-panel-check.mjs --list tool-output.txt
 | --- | --- |
 | 面板位置显示一张错误卡片 | 组件编译失败或渲染抛错。卡片上有插件 id 与错误原文；跑 `plugin-panel-check.mjs` 拿带行列号的版本 |
 | 「导出不是函数（default 应为 function，实际为 …）」 | 忘了 `export default`，或者导出的是对象/常量 |
-| 「模块 "xxx" 不在可用列表中」 | 组件里写了白名单之外的模块——改成 `React.createElement` 或可用的那几个 |
+| 「模块 "xxx" 不在可用列表中」 | 组件里写了白名单之外的模块，改成 `React.createElement` 或可用的那几个 |
 | 面板样式没生效 | Tailwind 不扫描插件源码；`className` 不管用，改用内联样式与 `hsl(var(--…))` 颜色变量 |
 | 调用工具返回 `{ success: false }` | 这不是异常，是正常失败返回：看 `error` 字段；若是 `code === "tier_required"`，说明该内置能力要套餐，提示用户升级并降级 |
 | 组件里 `props.serverId` 是空串 | 服务器还没连上（或没声明）。**先判断再用**，不要直接 `callTool` |
-| `ReferenceError: XXX is not defined`，一打开面板就崩 | 面板源码里的构建占位符（`/*__LPC__*/` 这类）没被内联。发布时要打成构建产物，别直接发源码——见 [面板与界面扩展](/plugin-dev/panels) |
-| 日志面板里什么都看不到 | ① 日志写到了 stdout（协议通道，收不到）；② 服务器压根没启动——看卡片上的「运行错误」或 `yarn log errors --local`；③ 禁用→启用一次让服务器重启 |
+| `ReferenceError: XXX is not defined`，一打开面板就崩 | 面板源码里的构建占位符（`/*__LPC__*/` 这类）没被内联。发布时要打成构建产物，别直接发源码，见 [面板与界面扩展](/plugin-dev/panels) |
+| 日志面板里什么都看不到 | ① 日志写到了 stdout（协议通道，收不到）；② 服务器压根没启动，看卡片上的「运行错误」或 `yarn log errors --local`；③ 禁用→启用一次让服务器重启 |
 
 ## 改了没生效？
 
@@ -133,7 +133,7 @@ node scripts/plugin-panel-check.mjs --list tool-output.txt
 | 目录包的 `manifest.json`（贡献声明、标题、位置……） | 覆盖文件即热更新，不用重启应用 |
 | 目录包里的面板源码 `panels/*.tsx` | 需要触发一次重读：把 `manifest.json` 重新保存一次，或在插件卡片上「重载」 |
 | 编辑器源码 `editor/*.tsx` | 同上；若改完毫无反应，先检查 `manifest.json` 里是不是被写入了一份内联的 `source`（见 [编辑器与组件扩展](/plugin-dev/editor)） |
-| 插件的 MCP 服务器脚本 | 脚本是子进程，改文件不会自动重启——在插件卡片上「禁用 → 启用」 |
+| 插件的 MCP 服务器脚本 | 脚本是子进程，改文件不会自动重启，在插件卡片上「禁用 → 启用」 |
 | 插件设置里的值 | 自动重启该插件的服务器（1 秒防抖），新的 env 随之生效 |
 
 ## 上线前自检清单

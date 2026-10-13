@@ -32,7 +32,7 @@ const features = [
     icon: ICONS.install,
     title: "第一次用？",
     details:
-      "从下载安装、首次启动引导，到写出第一篇 Markdown —— 三篇走完，十分钟上手。",
+      "从下载安装、首次启动引导，到写出第一篇 Markdown，三篇走完，十分钟上手。",
     link: "/guide/install",
     linkText: "开始使用",
   },
@@ -40,7 +40,7 @@ const features = [
     icon: ICONS.map,
     title: "想知道某个功能在哪？",
     details:
-      "工作区、编辑器、AI 对话、专家、连接器、技能、插件、主题、面板、快捷键 —— 每个页面配实机截图逐个讲。",
+      "工作区、编辑器、AI 对话、专家、连接器、技能、插件、主题、面板、快捷键，每个页面配实机截图逐个讲。",
     link: "/guide/",
     linkText: "功能地图",
   },
@@ -133,7 +133,7 @@ function openSearch() {
         alt="Notrat 主界面：文件树、编辑器与 AI 对话在同一屏"
       />
       <p class="nr-window-cap">
-        一个窗口里，把活干完 —— 文件、对话、终端、Agent 在同一处协作。
+        一个窗口里，把活干完。文件、对话、终端、Agent 在同一处协作。
       </p>
     </section>
 

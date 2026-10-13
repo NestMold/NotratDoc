@@ -14,7 +14,7 @@ title: 打包与发布
 | 有 `content.sourceFile` / `editors[].sourceFile` 引用包内文件 | **zip 目录包** | 同上 |
 | 纯声明：面板 TSX 内联在 manifest 的 `source` 字符串里 | 单文件 `<id>.json` | 自建 / 社区仓库（免审核） |
 
-判断方法很简单：**manifest 里有没有 `${pluginDir}`，或者有没有引用包内真文件**。有就必须 zip——`${pluginDir}` 只对目录包解析，单文件包到别人机器上找不到文件。
+判断方法很简单：**manifest 里有没有 `${pluginDir}`，或者有没有引用包内真文件**。有就必须 zip，`${pluginDir}` 只对目录包解析，单文件包到别人机器上找不到文件。
 
 ::: danger 目录包里别夹带构建输入
 如果面板源码是「模板 + 内核占位符」（`source` / `sourceFile` 里含 `/*__LPC__*/` 这类全大写注释块），那它是**构建输入**，装到用户机器上会当场 `ReferenceError`。
@@ -32,7 +32,7 @@ title: 打包与发布
 node build.mjs
 ```
 
-编译插件 TSX 成 CJS（经典 JSX，`React.createElement` 由宿主注入），内联进 manifest，写到 `~/.notrat/plugins/<id>.json`——磁盘监听会自动安装并启用。
+编译插件 TSX 成 CJS（经典 JSX，`React.createElement` 由宿主注入），内联进 manifest，写到 `~/.notrat/plugins/<id>.json`，磁盘监听会自动安装并启用。
 
 服务器脚本这类真文件不能进这个包：惯例是放到 `~/.notrat/mcp/`，别放 `plugins/` 目录（那个目录里只该有插件包文件）。
 
@@ -60,7 +60,7 @@ node build-release.mjs 1.2.0
 └── <插件>-<版本>.zip        # 上传给市场的包
 ```
 
-打包脚本固定条目顺序与时间戳，**同样的内容两次打包哈希相同**——别用系统「右键压缩」替代，那样哈希每次都不一样，跟 `checksums.txt` 就对不上了。
+打包脚本固定条目顺序与时间戳，**同样的内容两次打包哈希相同**，别用系统「右键压缩」替代，那样哈希每次都不一样，跟 `checksums.txt` 就对不上了。
 
 ## 版本号规则
 
@@ -68,7 +68,7 @@ node build-release.mjs 1.2.0
 
 - **每次发布都要显式给一个新版本号，且严格递增。**
 - 重发同一个版本号不会触发用户端更新（注册表按版本留档）。
-- manifest 内的 `version` 与注册表不一致时，**客户端以注册表为准**——发布时保持两者一致。
+- manifest 内的 `version` 与注册表不一致时，**客户端以注册表为准**，发布时保持两者一致。
 - `notrat.minVersion`（声明所需的最低应用版本）当前客户端**不依据它拦截**；市场的版本门槛来自注册表条目的 `min_app_version`。
 
 ## 上架：两条路线
@@ -96,9 +96,9 @@ zip 会被下载校验（sha256）后解包到 `~/.notrat/plugins/<id>/`；写�
 
 不住在官方市场、直接以公开仓库形式分发的插件，安装器会按这个顺序取包：
 
-1. **Release 资产优先**：先取仓库 latest release 上的 `.zip` 资产（你发布脚本的产物），并过一道**版本闸**——资产里的版本**低于**仓库 HEAD 的 manifest 版本时不采用（宁可回落源码，也不让用户悄悄降级）。
+1. **Release 资产优先**：先取仓库 latest release 上的 `.zip` 资产（你发布脚本的产物），并过一道**版本闸**，资产里的版本**低于**仓库 HEAD 的 manifest 版本时不采用（宁可回落源码，也不让用户悄悄降级）。
 2. **回落仓库分支 zip**：这是仓库里的原始源码。
-3. **装前闸**：分支 zip 里 manifest 引用的面板源码若还带构建占位符，直接拒装——把运行时的 `ReferenceError` 提前成安装失败。
+3. **装前闸**：分支 zip 里 manifest 引用的面板源码若还带构建占位符，直接拒装，把运行时的 `ReferenceError` 提前成安装失败。
 
 所以：**带构建步的插件，请务必发 Release 资产**，并保证资产里的版本不低于仓库里 manifest 的版本。
 

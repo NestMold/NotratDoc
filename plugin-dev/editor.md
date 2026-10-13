@@ -4,7 +4,7 @@ title: 编辑器与组件扩展
 
 # 编辑器与组件扩展
 
-这一页讲三件事：**用组件接管文件编辑**（`editors`）、**组件跑在什么环境里**（编译门禁与白名单），以及 **v1 时代的组件覆盖**（`diy`）。
+这一页讲三件事：用组件接管文件编辑（`editors`）、组件跑在什么环境里（编译门禁与白名单），以及 v1 时代的组件覆盖（`diy`）。
 
 ## editors：按扩展名接管文件
 
@@ -39,14 +39,14 @@ title: 编辑器与组件扩展
 ::: warning 不要抢内置格式
 匹配顺序是**内置编辑器优先**：先按内置固定顺序（二进制 → html → drawio → markdown → 各类查看器）逐个匹配，全部不命中才轮到插件，最后才是兜底的代码编辑器。
 
-也就是说，给 `.md`、`.drawio`、`.pdf`、图片声明编辑器**永远不会被选中**。插件接的是新格式。
+给 `.md`、`.drawio`、`.pdf`、图片声明编辑器永远不会被选中。插件接的是新格式。
 :::
 
-- 多个插件、多个编辑器可以共存；**同一扩展名按注册（启用）顺序先到先得**。
+- 多个插件、多个编辑器可以共存；同一扩展名按注册（启用）顺序先到先得。
 - 组件是**惰性编译**的：注册时只登记匹配规则，文件真被打开、组件挂载才编译；源码改后重新打开文件即生效（按源码缓存失效）。
 
 ::: warning 目录包：改了 .tsx 不生效时，先看 manifest.json
-目录包的编辑器源码会在读盘时被内联进内存里的 `source`。之后任何一次写回（启用/禁用、迁移作用域……）都可能把这份内联源码落回 `manifest.json`；而读取侧是「有 `source` 就不读 `sourceFile`」，于是磁盘上的 `.tsx` 从此被无视——改文件、重启都没用。
+目录包的编辑器源码会在读盘时被内联进内存里的 `source`。之后任何一次写回（启用/禁用、迁移作用域……）都可能把这份内联源码落回 `manifest.json`；而读取侧是「有 `source` 就不读 `sourceFile`」，于是磁盘上的 `.tsx` 从此被无视，改文件、重启都没用。
 
 判断方法：打开 `<插件目录>/manifest.json`，看 `editors[]` 里有没有一个很长的 `source` 字符串。有就把它删掉、只留 `sourceFile`，再重载插件即可。
 :::
@@ -73,7 +73,7 @@ export default function FancyEditor(props) {
 | --- | --- |
 | `pluginId` / `ctx` | 与面板组件同源的运行时上下文（工作区、窗口、AI 选择、划词选区、应用信息） |
 | `file` | 当前文件对象（含 id / name / path / content） |
-| `content` | 当前文件文本。**改内容调 `onChange(text)` 写回 store**，不要自己写盘——应用的 Ctrl+S 与保存按钮读的是同一份数据 |
+| `content` | 当前文件文本。**改内容调 `onChange(text)` 写回 store**，不要自己写盘。应用的 Ctrl+S 与保存按钮读的是同一份数据 |
 | `fileName` / `filePath` | 文件名与完整路径 |
 | `onChange(text)` | 写回内容 |
 | `onSave()` | 走宿主的保存通路 |
@@ -81,15 +81,15 @@ export default function FancyEditor(props) {
 | `mode` / `onModeSwitch` | 只有声明了 `dualView` 或 `modes` 才下发，见下 |
 | `modes` | 声明 `modes` 时下发完整模式表 |
 
-同一文件重新挂载时编辑器组件会按文件重建；面板/编辑器的**渲染抛错都被错误边界接住**，降级成一张错误卡片（写着插件 id 与错误信息），不会拖垮整个界面。
+同一文件重新挂载时编辑器组件会按文件重建；面板/编辑器的渲染抛错都被错误边界接住，降级成一张错误卡片（写着插件 id 与错误信息），不会拖垮整个界面。
 
 ## dualView：声明即得的双视图切换
 
 画布类、DSL 类编辑器常常需要「可视化 / 源码」两个视图。声明 `dualView` 后：
 
-- 标题栏自动出现与内置 markdown「编辑 | 源码」**同款**的模式切换 pill，位置就在内置那一排控制带上；
+- 标题栏自动出现与内置 markdown「编辑 | 源码」同款的模式切换 pill，位置就在内置那一排控制带上；
 - **作用域正确**：只有当前打开的文件被本编辑器接管时才显示，切到别的文件或页面自动隐藏；
-- 组件额外收到 `mode`（`"wysiwyg"` / `"source"`，实时）与 `onModeSwitch(mode)`——用户点 pill 与组件内部主动调走的是同一条通路。
+- 组件额外收到 `mode`（`"wysiwyg"` / `"source"`，实时）与 `onModeSwitch(mode)`，用户点 pill 与组件内部主动调走的是同一条通路。
 
 ```tsx
 export default function FancyEditor(props) {
@@ -106,12 +106,12 @@ export default function FancyEditor(props) {
 ```
 
 ::: tip 想要全局入口才用 editor-tabs
-`dualView` 是**跟编辑器走**的模式切换（自动显隐）。想要**常驻**的全局快捷入口（不跟当前文件走），用 `ui` 贡献的 `editor-tabs` / `editor-header` 位置——两者定位不同，见 [面板与界面扩展](/plugin-dev/panels)。
+`dualView` 是跟编辑器走的模式切换（自动显隐）。想要常驻的全局快捷入口（不跟当前文件走），用 `ui` 贡献的 `editor-tabs` / `editor-header` 位置，两者定位不同，见 [面板与界面扩展](/plugin-dev/panels)。
 :::
 
 ## modes：自定义多模式
 
-需要两个以上的模式（可视化 / 源码 / 分屏 / 预览……）就声明 `modes`——标题栏会渲染 N 个按钮，每个插件编辑器定义自己的模式组：
+需要两个以上的模式（可视化 / 源码 / 分屏 / 预览……）就声明 `modes`：标题栏会渲染 N 个按钮，每个插件编辑器定义自己的模式组：
 
 ```json
 {
@@ -131,7 +131,7 @@ export default function FancyEditor(props) {
 
 - 组件经 `props.mode`（当前模式 id）与 `props.onModeSwitch(id)` 读写；`props.modes` 同时下发完整模式表（想在组件内部画自己的模式菜单可用）。
 - 模式 id 是任意字符串，语义完全由组件解释：`if (mode === "split") return <Split />`。
-- 模式状态**按编辑器记忆、跨文件保留**，与内置的 wysiwyg / source 相互独立。
+- 模式状态按编辑器记忆、跨文件保留，与内置的 wysiwyg / source 相互独立。
 - **至少声明 2 个才生效**（封顶 6 个）；**声明 `modes` 时 `dualView` 被忽略**。
 
 ## setStatus：把实时状态推到状态栏
@@ -157,13 +157,13 @@ export default function FancyEditor(props) {
 
 - 条目形状 `{ id, text, title? }`；`text` 至少 1 个字符才渲染。
 - **上限 6 条、单条 80 字符**（超出截断）；重复上报相同内容不会触发重渲染（可以跟着状态高频调）。
-- 清除用 `setStatus([])`；**组件卸载时自动清空**，不会残留陈旧状态。
+- 清除用 `setStatus([])`；组件卸载时自动清空，不会残留陈旧状态。
 - 位置在状态栏右侧、内置 Ln/Col 左侧；无人上报时这块不渲染。
 - 区别于 `ui` 贡献的 `status-bar` 位置：那边是**面板/徽章**（可交互、走 dataTool 轮询），`setStatus` 是**编辑器实例的实时状态**。
 
 ## outlineTool：接上左侧大纲
 
-大纲面板对插件编辑器的**唯一契约**是两件事：导入大纲条目、点击时定位。声明一个返回条目的 MCP 工具即可：
+大纲面板对插件编辑器的唯一契约是两件事：导入大纲条目、点击时定位。声明一个返回条目的 MCP 工具即可：
 
 ```json
 {
@@ -219,15 +219,15 @@ React.useEffect(() => {
 }
 ```
 
-只有**当前打开文件的扩展名命中**时该面板才出现。不同格式的编辑器插件可以各自贡献自家格式的大纲面板，互不占用；面板拿文件内容自行解析结构（`props.ctx.workspace` + 自家 MCP 工具）。
+只有当前打开文件的扩展名命中时该面板才出现。不同格式的编辑器插件可以各自贡献自家格式的大纲面板，互不占用；面板拿文件内容自行解析结构（`props.ctx.workspace` + 自家 MCP 工具）。
 
 未声明 `extensions` = 始终显示；当前没有打开文件时，声明了过滤的面板隐藏。
 
 ## 组件运行环境
 
-面板、编辑器、渲染器**共用同一条编译与求值链路**，所以约束完全一致：
+面板、编辑器、渲染器共用同一条编译与求值链路，所以约束完全一致：
 
-1. 源码经 `component:compile` 编译——esbuild，参数固定为 `loader: tsx`、`jsxFactory: React.createElement`、`jsxFragment: React.Fragment`、`target: es2020`、`format: cjs`，编译超时 5 秒（编辑器宿主侧另有 8 秒兜底）。
+1. 源码经 `component:compile` 编译，esbuild 参数固定为 `loader: tsx`、`jsxFactory: React.createElement`、`jsxFragment: React.Fragment`、`target: es2020`、`format: cjs`，编译超时 5 秒（编辑器宿主侧另有 8 秒兜底）。
 2. 编译产物用 `new Function("require", "exports", "module", "React", code)` 求值，`React` 是位置形参。
 3. 产物里的 `require("...")` 由一张白名单映射表满足，**列外模块直接抛错**：
 
@@ -269,6 +269,6 @@ v1 插件包（只有 `diy` + `mcpServers`）向后兼容，仍可用。两件�
 ```
 
 - `overrides[].id` 是被替换组件的复合键 `路径#导出名`；`source` 是替换后的 TSX，走同一条编译链路。
-- 覆盖在**启用时**生效、禁用即还原。多个插件覆盖同一组件时可以共存（各自的键带 `plugin:<插件id>:` 前缀，独立可删），**取最新启用者生效**。
+- 覆盖在启用时生效、禁用即还原。多个插件覆盖同一组件时可以共存（各自的键带 `plugin:<插件id>:` 前缀，独立可删），**取最新启用者生效**。
 - `slotOverrides[].type` 取值 `style` / `props` / `behavior` / `content`；`selector` 是 CSS 选择器或组件路径。
 - **新插件不建议再用 `diy` 做界面改造**：面板有 13 个可声明位置、编辑器有专用贡献面、终端用户还能自己对 `.notrat-plugin-panel-*` 这类语义钩子类改样式。`diy` 主要留给老包与「必须替换某个内置组件」的场景。

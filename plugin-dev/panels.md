@@ -8,13 +8,13 @@ title: 面板与界面扩展
 
 ## 面板贡献：ui 与 sidebar
 
-两条通道，但**能力不一样**：
+两条通道，能力不一样：
 
-- **`contributions.ui[]`** —— 通用 UI 贡献，用 `location` 指定渲染位置。**推荐用它**：三种内容类型、`sourceFile` 内联、`fullBleed`、`command` 都在这一条通道上。
-- **`contributions.sidebar[]`** —— 旧的侧边栏面板（聊天输入框上方），位置等同于 `location: "sidebar-input"`。能力窄一档：内容类型只有 markdown / list / component，`component` **只认内联 `source`**，没有 `sourceFile` / `fullBleed` / `command`。
+- **`contributions.ui[]`**：通用 UI 贡献，用 `location` 指定渲染位置。推荐用它，三种内容类型、`sourceFile` 内联、`fullBleed`、`command` 都在这一条通道上。
+- **`contributions.sidebar[]`**：旧的侧边栏面板（聊天输入框上方），位置等同于 `location: "sidebar-input"`。能力窄一档：内容类型只有 markdown / list / component，`component` 只认内联 `source`，没有 `sourceFile` / `fullBleed` / `command`。
 
 ::: warning 写 `sidebar` 时别用 `sourceFile`
-`sourceFile` 的内联只对 `ui[]` 与 `editors[]` 生效——读盘内联、装前占位符扫描、写回剥离三层都只遍历这两处，完全不碰 `sidebar`。在 `sidebar[]` 里写 `sourceFile` **不会报错**，但源码永远不会被内联，面板运行时直接编译失败。
+`sourceFile` 的内联只对 `ui[]` 与 `editors[]` 生效：读盘内联、装前占位符扫描、写回剥离三层都只遍历这两处，完全不碰 `sidebar`。在 `sidebar[]` 里写 `sourceFile` 不会报错，但源码永远不会被内联，面板运行时直接编译失败。
 
 要目录包的 `sourceFile`：改用 `ui` + `location: "sidebar-input"`。
 :::
@@ -63,12 +63,12 @@ title: 面板与界面扩展
 | `widget` | 桌面悬浮器窗口（独立窗口） | 常驻，**不支持被用户改位置** |
 | `page` | 完整主区标签页（像文件标签一样切换、关闭） | 由插件箱点开 |
 
-共 13 个可声明位置；其中 **12 个可被用户互移**（`widget` 是独立窗口，不在移动目标里）。
+共 13 个可声明位置；其中 12 个可被用户互移（`widget` 是独立窗口，不在移动目标里）。
 
 ::: tip 编辑器里的模式切换别用 editor-tabs
-如果你想让用户切换**当前这个文件**的源码/可视化模式，用 `editors[].dualView` 或 `modes`——它跟着编辑器走、切文件自动显隐。[编辑器与组件扩展](/plugin-dev/editor) 里有说明。
+如果你想让用户切换当前这个文件的源码/可视化模式，用 `editors[].dualView` 或 `modes`，它跟着编辑器走、切文件自动显隐。[编辑器与组件扩展](/plugin-dev/editor) 里有说明。
 
-`editor-tabs` / `editor-header` 是**与当前文件无关的全局入口**，两者定位不同。
+`editor-tabs` / `editor-header` 是与当前文件无关的全局入口，两者定位不同。
 :::
 
 ## 触发位：活动栏按钮怎么加
@@ -102,7 +102,7 @@ title: 面板与界面扩展
 
 ## 面板内容：四种类型
 
-### markdown —— 静态文本
+### markdown：静态文本
 
 ```json
 { "type": "markdown", "text": "**提示**：先选中文本再点下面的按钮。" }
@@ -110,9 +110,9 @@ title: 面板与界面扩展
 
 纯声明，零编译，适合写说明与提示。
 
-### list —— 由工具数据渲染的列表
+### list：由工具数据渲染的列表
 
-应用自己调 MCP 工具拿数据，按行渲染成带勾选框的列表。**最稳的一种**：不编译、不求值。
+应用自己调 MCP 工具拿数据，按行渲染成带勾选框的列表。最稳的一种：不编译、不求值。
 
 ```json
 {
@@ -146,7 +146,7 @@ title: 面板与界面扩展
 
 即 `[ ]` 或 `[x]`（也接受 `[-]`）紧跟 `#` 加数字 id，再跟正文；id 会作为 `actionArgField` 指定的参数传回工具。工具的返回值可以是字符串、MCP 标准的 `{ "content": [{ "type": "text", "text": "…" }] }`，宿主会先解包再按行解析。
 
-### component —— TSX 组件
+### component：TSX 组件
 
 ```json
 {
@@ -165,13 +165,13 @@ title: 面板与界面扩展
 | `dataTool` / `refreshMs` | 同 `list`：宿主异步拉好数据，作为 `props.data` 交给你，并在需要时刷新 |
 | `fullBleed` | 仅 `location: "page"` 时有意义：去掉宿主的内边距与面板外壳，让组件铺满主区（画布、看板类面板用） |
 
-> 上表是 `ui[]` 的 `component`。**`sidebar[]` 的 `component` 只有 `source` / `dataTool` / `refreshMs` 三个字段**，没有 `sourceFile` 与 `fullBleed`。
+> 上表是 `ui[]` 的 `component`。`sidebar[]` 的 `component` 只有 `source` / `dataTool` / `refreshMs` 三个字段，没有 `sourceFile` 与 `fullBleed`。
 
-一句话说清这条边界：**插件带入声明与逻辑，宿主提供运行时**。面板能拿到什么（`props.serverId`、`props.ctx`、`window.electronAPI`）全部来自宿主在运行态边界上的注入——下图是这条边界的全景：
+插件带入声明与逻辑，宿主提供运行时。面板能拿到什么（`props.serverId`、`props.ctx`、`window.electronAPI`）全部来自宿主在运行态边界上的注入，下图就是这条边界的全景：
 
 ![Notrat 插件运行时架构：插件带入的三个文件（manifest / MCP 服务器 / 面板）经 props 接口进入 Notrat Runtime，宿主提供 AI 网关、终端、文件系统等核心服务](/shots/plugin-dev/plugin-system-arch.png)
 
-橙色 = 插件开发者带入（manifest / server / panel），蓝色 = Notrat 宿主提供；边界上是 props 注入的接口。上半场是插件侧的三个文件各自被宿主接管的入口（注册清单、spawn 子进程、编译面板），下半场左边是宿主内部实现、右边是它在边界上暴露出来的四个 props 入口——`props.serverId`、`props.ctx.ai`、`props.ctx.workspace`、`window.electronAPI`。
+橙色 = 插件开发者带入（manifest / server / panel），蓝色 = Notrat 宿主提供；边界上是 props 注入的接口。上半场是插件侧的三个文件各自被宿主接管的入口（注册清单、spawn 子进程、编译面板），下半场左边是宿主内部实现、右边是它在边界上暴露出来的四个 props 入口：`props.serverId`、`props.ctx.ai`、`props.ctx.workspace`、`window.electronAPI`。
 
 组件收到的 props：
 
@@ -184,7 +184,7 @@ title: 面板与界面扩展
 | `dataError` | 拉数据失败时的错误 |
 | `launch` | 打开入口携带的参数，形如 `{ params: { filePath, fileName, isFolder } }`（文件树右键菜单用） |
 
-**先防御再调用**：`serverId` 可能为空，`callTool` 失败返回的是 `{ success: false, error }` 而不是抛异常——两处都要处理。
+**先防御再调用**：`serverId` 可能为空；`callTool` 失败不抛异常，返回 `{ success: false, error }`，两处都要处理。
 
 ```tsx
 export default function MyPanel(props) {
@@ -207,12 +207,12 @@ export default function MyPanel(props) {
 ```
 
 ::: warning 组件的运行环境
-可用模块只有 `react`、`react-dom`、`lucide-react`、`@/utils/cn`、`@/store`、`@/store/slices/componentOverride`、`@/utils/tokenEstimate`——可以写 `import`（编译后交给宿主的 `require` 白名单），白名单外报错；`React` 另外由宿主作为形参注入，直接引用即可。样式必须内联（Tailwind 不扫描插件源码），主题色用 `hsl(var(--foreground))` 这类颜色变量。细节见 [编辑器与组件扩展](/plugin-dev/editor)。
+可用模块只有 `react`、`react-dom`、`lucide-react`、`@/utils/cn`、`@/store`、`@/store/slices/componentOverride`、`@/utils/tokenEstimate`，可以写 `import`（编译后交给宿主的 `require` 白名单），白名单外报错；`React` 另外由宿主作为形参注入，直接引用即可。样式必须内联（Tailwind 不扫描插件源码），主题色用 `hsl(var(--foreground))` 这类颜色变量。细节见 [编辑器与组件扩展](/plugin-dev/editor)。
 :::
 
 **坏面板不会拖垮宿主**：每个面板都包了错误边界，渲染抛错只会在那个位置降级成一张错误卡片（写着插件 id 与错误信息，带「卸载」按钮），侧边栏与整个界面照常可用。
 
-### command —— 点了就调工具，不弹面板
+### command：点了就调工具，不弹面板
 
 ```json
 { "type": "command", "tool": "todo_stats", "args": { "scope": "today" } }
@@ -241,7 +241,7 @@ export default function MyPanel(props) {
 ```
 
 - `fullBleed: true` 让组件铺满主区（去内边距与面板外壳），画布类组件要自己管内边距。
-- 用户也可以把**任何**面板右键改成整页打开，或把整页面板搬回其他位置——manifest 里声明的只是默认值。
+- 用户也可以把任何面板右键改成整页打开，或把整页面板搬回其他位置，manifest 里声明的只是默认值。
 
 ## 面板的位置与样式归用户
 
@@ -276,7 +276,7 @@ manifest 声明的是**默认位置**，用户随时可以覆盖：
 | `argsTemplate` | 参数模板：`$0`、`$1`…… 依次替换成用户输入的空格分隔参数；写成 `"$0"`（带引号）时会做 JSON 转义后再填。模板拼出来的字符串会被 `JSON.parse`，解析失败则退化成 `{ "args": [...] }` |
 | `usage` | 用法提示，显示在斜杠选择器里 |
 
-- 命令是**客户端直调 MCP**，不经过 AI——用户敲 `/my-hello 世界`，工具立刻被执行，结果直接显示。
+- 命令是客户端直调 MCP，不经过 AI：用户敲 `/my-hello 世界`，工具立刻被执行，结果直接显示。
 - 命令会自动出现在斜杠选择器的「插件」分类下。
 - **内置命令优先**；插件之间先启用者赢，被遮蔽的命令仍可用万能命令调用：`/plugin-run <插件id> <工具名> [JSON 参数]`。
 
@@ -298,7 +298,7 @@ manifest 声明的是**默认位置**，用户随时可以覆盖：
 
 - `slot` 取值 `custom` / `skills` / `mcp` / `agent` / `im`。`custom` 会渲染成一个独立的 `## {title}` 段落，其余并入对应的运行时块。
 - 注入位置在所有对话路径上统一生效（用户 profile 之后、交互组件指令之前）。
-- 提示词是「告诉模型你有什么」，不是「替用户做决定」——它不能让模型跳过确认，也不能替用户选中技能。
+- 提示词是「告诉模型你有什么」，不是「替用户做决定」：它不能让模型跳过确认，也不能替用户选中技能。
 
 ## 声明式设置：settings
 
@@ -328,12 +328,12 @@ manifest 声明的是**默认位置**，用户随时可以覆盖：
 ```
 
 - 字段类型：`text` / `textarea` / `number` / `boolean` / `select` / `secret`。`select` 需要 `options`；还可以给 `default`、`description`、`required`。
-- 值存进本地设置存储，键是**两层**：`<设置组 key>` → `<字段 key>`。
+- 值存进本地设置存储，键是两层：`<设置组 key>` → `<字段 key>`。
 - 服务器 env 里用 `${settings:<字段key>}` 引用（例如 `"env": { "MY_LIMIT": "${settings:limit}" }`）。
 - 改值后该插件的 MCP 服务器会自动重启（1 秒防抖），新的 env 随之生效。
 
 ::: danger 两个必须对齐的地方
-1. **`settings[].key` 必须等于插件的 `id`。** 面板里存值用的是设置组的 key，而解析 `${settings:…}` 时是按**插件 id** 去取值的——两者不一致，服务器读到的就是空字符串。
+1. **`settings[].key` 必须等于插件的 `id`。** 面板里存值用的是设置组的 key，而解析 `${settings:…}` 时是按**插件 id** 去取值的。两者不一致，服务器读到的就是空字符串。
 2. **`${settings:…}` 里只写字段 key**，不要写 `设置组key.字段key`。写成 `"${settings:my-plugin.limit}"` 会解析成空串。
 :::
 
@@ -438,7 +438,7 @@ manifest 声明的是**默认位置**，用户随时可以覆盖：
 
 ### 构建占位符：`/*__XXX__*/`
 
-有些插件在开发期把面板源码写成「模板 + 内核代码占位符」的形式，发布脚本再把内核代码内联进去（例如把大段编辑器内核塞进面板）。占位符长这样——全大写的注释块：
+有些插件在开发期把面板源码写成「模板 + 内核代码占位符」的形式，发布脚本再把内核代码内联进去（例如把大段编辑器内核塞进面板）。占位符是全大写的注释块：
 
 ```text
 /*__LPC__*/    /*__WYS__*/    /*__TX__*/
@@ -454,7 +454,7 @@ Notrat 在**社区货架安装**这条通路上加了装前闸：
 
 **所以发布带构建步的插件，两点必须做到：**
 
-1. 把构建产物（占位符已内联）作为 **Release 资产 zip** 发布。社区货架优先取 Release 资产，取不到或版本落后才回落仓库分支 zip——分支 zip 里是原始源码，正好会命中装前闸。
+1. 把构建产物（占位符已内联）作为 **Release 资产 zip** 发布。社区货架优先取 Release 资产，取不到或版本落后才回落仓库分支 zip。分支 zip 里是原始源码，正好会命中装前闸。
 2. 或者干脆内联进 manifest 的 `source`，不走构建步。
 
 调试这类问题时，面板的错误信息里会直接写着缺哪个标识符（`ReferenceError: <内核名> is not defined`），对着占位符表就能认出是没跑构建。
