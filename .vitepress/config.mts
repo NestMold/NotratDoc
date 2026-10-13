@@ -159,7 +159,9 @@ export default defineConfig({
       },
     },
 
-    socialLinks: [{ icon: "github", link: "https://github.com/Karosown/Notrat" }],
+    socialLinks: [
+      { icon: "github", link: "https://github.com/NestMold/NotratDoc" },
+    ],
 
     footer: {
       message:
