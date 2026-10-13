@@ -8,10 +8,16 @@ title: 面板与界面扩展
 
 ## 面板贡献：ui 与 sidebar
 
-两条通道，内容类型基本一致：
+两条通道，但**能力不一样**：
 
-- **`contributions.ui[]`** —— 通用 UI 贡献，用 `location` 指定渲染位置。**推荐用它**，`sidebar` 只是它的一个特例。
-- **`contributions.sidebar[]`** —— 侧边栏面板（聊天输入框上方），渲染位置等同于 `location: "sidebar-input"`，只是字段里少一个 `location`。
+- **`contributions.ui[]`** —— 通用 UI 贡献，用 `location` 指定渲染位置。**推荐用它**：三种内容类型、`sourceFile` 内联、`fullBleed`、`command` 都在这一条通道上。
+- **`contributions.sidebar[]`** —— 旧的侧边栏面板（聊天输入框上方），位置等同于 `location: "sidebar-input"`。能力窄一档：内容类型只有 markdown / list / component，`component` **只认内联 `source`**，没有 `sourceFile` / `fullBleed` / `command`。
+
+::: warning 写 `sidebar` 时别用 `sourceFile`
+`sourceFile` 的内联只对 `ui[]` 与 `editors[]` 生效——读盘内联、装前占位符扫描、写回剥离三层都只遍历这两处，完全不碰 `sidebar`。在 `sidebar[]` 里写 `sourceFile` **不会报错**，但源码永远不会被内联，面板运行时直接编译失败。
+
+要目录包的 `sourceFile`：改用 `ui` + `location: "sidebar-input"`。
+:::
 
 ```json
 {
@@ -159,6 +165,8 @@ title: 面板与界面扩展
 | `dataTool` / `refreshMs` | 同 `list`：宿主异步拉好数据，作为 `props.data` 交给你，并在需要时刷新 |
 | `fullBleed` | 仅 `location: "page"` 时有意义：去掉宿主的内边距与面板外壳，让组件铺满主区（画布、看板类面板用） |
 
+> 上表是 `ui[]` 的 `component`。**`sidebar[]` 的 `component` 只有 `source` / `dataTool` / `refreshMs` 三个字段**，没有 `sourceFile` 与 `fullBleed`。
+
 组件收到的 props：
 
 | prop | 说明 |
@@ -174,22 +182,26 @@ title: 面板与界面扩展
 
 ```tsx
 export default function MyPanel(props) {
-  if (!props.serverId) {
-    return <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>连接器（MCP）未就绪</div>;
-  }
+  // 钩子写在最前面：serverId 会从空字符串变成非空（服务器连上那一刻），
+  // 若把 useState 放在 early return 之后，两次渲染的钩子数不同 → React 抛
+  // "Rendered more hooks than during the previous render"，面板降级成错误卡片。
   const [text, setText] = React.useState("");   // React 是位置形参，直接用
   React.useEffect(() => {
+    if (!props.serverId) return;                // 空 = 服务器还没起来，等下一次
     window.electronAPI.mcp
       .callTool(props.serverId, "todo_list", {})
       .then((res) => setText(res && res.success ? "加载成功" : "加载失败"))
       .catch(() => setText("加载失败"));
   }, [props.serverId]);
+  if (!props.serverId) {
+    return <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>连接器（MCP）未就绪</div>;
+  }
   return <div style={{ fontSize: 12 }}>{text}</div>;
 }
 ```
 
 ::: warning 组件的运行环境
-不能写 `import`，可用模块只有 `react`、`react-dom`、`lucide-react`、`@/utils/cn`、`@/store`、`@/store/slices/componentOverride`、`@/utils/tokenEstimate`；`React` 由宿主作为形参注入，直接引用即可。样式必须内联（Tailwind 不扫描插件源码），主题色用 `hsl(var(--foreground))` 这类颜色变量。细节见 [编辑器与组件扩展](/plugin-dev/editor)。
+可用模块只有 `react`、`react-dom`、`lucide-react`、`@/utils/cn`、`@/store`、`@/store/slices/componentOverride`、`@/utils/tokenEstimate`——可以写 `import`（编译后交给宿主的 `require` 白名单），白名单外报错；`React` 另外由宿主作为形参注入，直接引用即可。样式必须内联（Tailwind 不扫描插件源码），主题色用 `hsl(var(--foreground))` 这类颜色变量。细节见 [编辑器与组件扩展](/plugin-dev/editor)。
 :::
 
 **坏面板不会拖垮宿主**：每个面板都包了错误边界，渲染抛错只会在那个位置降级成一张错误卡片（写着插件 id 与错误信息，带「卸载」按钮），侧边栏与整个界面照常可用。
@@ -406,6 +418,8 @@ manifest 声明的是**默认位置**，用户随时可以覆盖：
 完整的字段、props、模式与大纲协议见 [编辑器与组件扩展](/plugin-dev/editor)。
 
 ## 面板源码的两种装法
+
+> 这一节讲的是 **`ui[]` 与 `editors[]`**。`sidebar[]` 只支持内联 `source`，没有 `sourceFile`。
 
 | 装法 | 用在哪 | 写法 |
 | --- | --- | --- |

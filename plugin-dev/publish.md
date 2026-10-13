@@ -108,7 +108,7 @@ zip 会被下载校验（sha256）后解包到 `~/.notrat/plugins/<id>/`；写�
 | --- | --- |
 | zip 大小 | ≤ 20MB |
 | 文件数 | ≤ 200（社区分支包上限 500） |
-| 扩展名白名单 | `.json .js .mjs .cjs .ts .tsx .css .html .md .txt .svg .png .jpg .webp .gif .ico .woff .woff2 .ttf .map .yaml .yml` |
+| 扩展名白名单 | `.json .js .mjs .cjs .ts .tsx .css .scss .html .md .txt .svg .png .jpg .jpeg .webp .gif .ico .woff .woff2 .ttf .map .yaml .yml`（25 项，白名单外一律拒收） |
 
 **内容红线**：市场素材（详情页文案、截图、示例）不得包含个人文档内容（剧本、回忆录等），示例一律用中性文案。
 

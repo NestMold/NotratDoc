@@ -28,7 +28,7 @@ title: 编辑器与组件扩展
 
 | 字段 | 说明 |
 | --- | --- |
-| `id` | 插件内唯一。注册表里的 id 是 `plugin-editor:<插件id>:<id>` |
+| `id` | 插件内唯一。注册表里的 id 是 `plugin-editor:<插件id>/<编辑器id>`（注意是斜杠；`ui` / `sidebar` 面板才是冒号） |
 | `label` | 展示名（错误卡片、编辑器枚举用） |
 | `extensions` | 匹配的扩展名（不含点、大小写不敏感） |
 | `source` / `sourceFile` | 编辑器组件源码。目录包写 `sourceFile`，读盘时被内联成 `source`；两者同时存在时 `source` 优先 |
@@ -238,7 +238,7 @@ react / react-dom / lucide-react
 
 由此得到三条硬规矩：
 
-- **不要写 `import` 语句**（即便写了，也只会变成 require，落到白名单之外就报错）。要用 `React.useState` 就直接引用形参 `React`。
+- **只能用白名单模块**：`import` 会被编译成宿主的 `require`，白名单内的 7 个模块能正常加载，白名单外报「模块不在可用列表中」。要用 `React.useState` 可以直接引用形参 `React`。
 - **样式内联**。Tailwind 不扫描插件源码，`className="flex flex-col h-full"` 不会生成任何 CSS。主题色用颜色变量：`hsl(var(--foreground))`、`hsl(var(--card))`、`hsl(var(--border))`、`hsl(var(--muted-foreground))`……亮暗主题自动跟随。
 - **默认导出必须是函数**（函数组件、class 组件都行）。否则报「导出不是函数」并列出实际形状。
 

@@ -8,7 +8,7 @@ Notrat 的插件不是「往应用里注入代码」，而是**一份 JSON 声�
 
 - **声明部分**（`manifest.json` 或单文件 `<id>.json`）：告诉 Notrat 你要贡献什么——面板放哪、命令叫什么、哪些扩展名的文件归你管、要不要注入提示词。
 - **执行部分**（MCP 服务器子进程）：插件的逻辑跑在这里，用 stdio 上的 JSON-RPC 暴露工具。这是插件的沙箱，也是一切「重活」的落点。
-- **界面部分**（TSX 组件）：面板与编辑器的界面代码，经编译与门禁后由宿主渲染，拿不到 Node 能力，也不能 `import` 任意模块。
+- **界面部分**（TSX 组件）：面板与编辑器的界面代码，经编译与门禁后由宿主渲染，拿不到 Node 能力，只能使用白名单里的几个模块。
 
 三者组合起来，就是一个可分发的插件包，可以只放在自己机器上，也可以发布到插件市场。
 
@@ -45,7 +45,7 @@ Notrat 的插件不是「往应用里注入代码」，而是**一份 JSON 声�
 **不能做的：**
 
 - **不能在渲染进程或主进程里跑任意代码。** 界面代码只有一条入口：经 `component:compile` 编译（esbuild + 黑名单）+ `withOverride` 求值；插件逻辑请放进 MCP 服务器子进程。
-- **不能 `import` 任意模块。** 面板/编辑器组件的运行环境只提供 `react`、`react-dom`、`lucide-react`、`@/utils/cn`、`@/store`、`@/store/slices/componentOverride`、`@/utils/tokenEstimate`，且不能写 `import` 语句（React 是位置形参）。
+- **只能使用白名单模块。** 面板/编辑器组件的运行环境提供 7 个模块：`react`、`react-dom`、`lucide-react`、`@/utils/cn`、`@/store`、`@/store/slices/componentOverride`、`@/utils/tokenEstimate`——可以写 `import`（编译后会变成宿主的 `require`），白名单外报错。`React` 另有位置形参注入，直接引用即可。
 - **不能覆盖认证、权限、订阅等级、强制更新相关的组件。** 这些在编译门禁的黑名单里，命中直接拒绝编译。
 - **不能读会话令牌。** `electronAPI.notratAuth` 不是插件契约，读取或外传会话令牌属于上架红线；需要用户身份请走插件作用域身份。
 - **不能绕过套餐门禁。** 部分内置能力（如 `builtin-channel`、`builtin-evolution`）是 Pro 专属，被拦截时面板会拿到结构化的 `tier_required` 错误——正确做法是提示用户升级并降级，不是屏蔽错误。
@@ -55,24 +55,17 @@ Notrat 的插件不是「往应用里注入代码」，而是**一份 JSON 声�
 
 ## 整体架构
 
-```mermaid
-flowchart TB
-  subgraph Pack["插件包（单文件 JSON 或 目录包 zip）"]
-    M["manifest<br/>id · name · version · 贡献声明"]
-    P["panels/*.tsx<br/>面板 / 编辑器源码"]
-    S["server/*.js<br/>MCP 服务器"]
-  end
+```text
+插件包（单文件 JSON 或 目录包 zip）
+├── manifest       id · name · version · contributions / mcpServers
+├── panels/*.tsx   面板与编辑器源码
+└── server/*.js    插件自带的 MCP 服务器
 
-  M -- "contributions" --> Reg["贡献注册表（渲染层）"]
-  P -- "编译（esbuild + 门禁）" --> Reg
-  M -- "mcpServers" --> Route["MCP 路由（主进程）"]
-  S -- "stdio · JSON-RPC" --> Route
-
-  Reg --> Host["界面宿主<br/>面板 / 编辑器 / 活动栏 / 状态栏 / 菜单"]
-  Route --> Tools["工具表"]
-  Tools --> Chat["AI 对话 · 斜杠命令 · 面板组件"]
-  Host -- "callTool" --> Route
-  Host -- "本机 SSE 网关" --> AI["用户已配置的 AI 服务商"]
+① 界面链路   manifest.contributions ─▶ 贡献注册表（渲染层）─▶ 界面宿主（面板 / 编辑器 / 活动栏 / 状态栏 / 菜单）
+             panels/*.tsx  ──编译（esbuild + 门禁）──▶ 同上
+② 工具链路   server/*.js  ──stdio · JSON-RPC──▶ MCP 路由（主进程）─▶ 工具表 ─▶ AI 对话 · 斜杠命令 · 面板组件
+③ 跨进程     界面宿主 ──callTool──▶ MCP 路由            （面板组件不直接碰子进程）
+④ 借用 AI    界面宿主 ──本机 SSE 网关──▶ 用户已配置的 AI 服务商
 ```
 
 几个要点：

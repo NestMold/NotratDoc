@@ -57,7 +57,7 @@ my-plugin/
 
 - `id` 必须是 kebab-case（小写字母、数字、连字符），且**必须与目录名一致**。
 - `version` 必须存在（客户端的更新检测全靠它逐段比大小）。
-- `manifestVersion: 2` 表示声明式贡献模型，`contributions` 才会被读取。
+- `manifestVersion: 2` 是包版本标记。**当前客户端不据此分流**：写 `1`、写 `2`、不写，`contributions` 一样会被读取（仍建议写 `2`）。
 - `enabled` 是磁盘上的开关字段。手动把插件拷进 `~/.notrat/plugins/` 时**必须写 `enabled: true`**，否则插件会被装进来但不启用；从插件市场安装时安装器会自动补上（除非你显式写了 `enabled: false`）。
 - `content.sourceFile` 是相对包根的路径——主进程读盘时会把它内联成源码，磁盘上保留引用即可，方便你用编辑器改这份真文件。
 
@@ -83,7 +83,7 @@ export default function MyPanel(props) {
 
 三条必守的规矩：
 
-1. **不要写 `import`。** 组件源码经 esbuild 编译后用 `new Function("require", "exports", "module", "React", code)` 求值，`React` 是位置形参。可用模块只有 `react`、`react-dom`、`lucide-react`、`@/utils/cn`、`@/store`、`@/store/slices/componentOverride`、`@/utils/tokenEstimate`，其余一律报错。
+1. **只能用白名单模块。** 组件源码经 esbuild 编译后用 `new Function("require", "exports", "module", "React", code)` 求值：里面写的 `import` 会被编译成 `require`，交给宿主的白名单。可用模块只有 `react`、`react-dom`、`lucide-react`、`@/utils/cn`、`@/store`、`@/store/slices/componentOverride`、`@/utils/tokenEstimate`，其余一律报错。`React` 还额外作为位置形参注入，直接引用即可。
 2. **样式内联，别写 Tailwind 工具类。** Tailwind 不扫描插件源码，`className="bg-blue-500"` 不会生成任何 CSS。主题色请用颜色变量，例如 `color: "hsl(var(--foreground))"`、背景 `hsl(var(--card))`、描边 `hsl(var(--border))`——这样亮暗主题自动跟随。
 3. **默认导出必须是函数。** 宿主只认 `export default` 出来的那个函数（函数组件、类组件都行）。
 

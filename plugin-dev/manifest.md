@@ -22,12 +22,12 @@ manifest 是插件的身份证与说明书。同一个结构有两种载体：
 | `author` | `string` | 否 | 作者名。**只写字符串**，别写 npm 风格的对象（见下方「字段类型不可信」） | `"某某工作室"` |
 | `icon` | `string` | 否 | 包级图标：emoji 或图片 URL（http/https）。缺省时回落第一个 UI 面板贡献的 `icon`，再回落 🧩 | `"🧩"` |
 | `type` | `"theme"` \| `"feature"` \| `"bundle"` | 否 | `theme` = 纯样式、`feature` = 含逻辑、`bundle` = 混合。缺省 `bundle` | `"feature"` |
-| `manifestVersion` | `1` \| `2` | 否 | `2` = 声明式贡献模型（`contributions` 会被读取）；缺省或 `1` = 旧版包 | `2` |
+| `manifestVersion` | `1` \| `2` | 否 | 包版本标记。**当前客户端不据此分流**：写 `1`、写 `2`、不写，`contributions` 一样会被读取（建议写 `2`） | `2` |
 | `notrat` | `object` | 否 | `{ "minVersion": "1.3.0" }`：声明所需的最低应用版本。当前客户端不依据它拦截——市场的版本门槛来自注册表条目的 `min_app_version`（在插件详情页展示） | `{ "minVersion": "1.3.0" }` |
 | `enabled` | `boolean` | 否 | 磁盘上的开关字段。手动拷进插件目录时必须写 `true`，否则装上但不启用；市场安装器会自动补 `true`（除非显式写 `false`） | `true` |
 | `scope` | `"global"` \| `"workspace"` | 否 | 插件落点：全局目录或当前工作区目录。缺省 `global`，由应用在启用/迁移时写回 | `"global"` |
 | `mcpServers` | `array` | 否 | 插件自带的 MCP 服务器声明，见下节 | 见下 |
-| `contributions` | `object` | 否 | 十类声明式贡献，见下节 | 见下 |
+| `contributions` | `object` | 否 | 九类声明式贡献，见下节 | 见下 |
 | `diy` | `object` | 否 | v1 兼容的组件覆盖与槽位覆盖（**顶层字段，不在 `contributions` 里**） | 见 [编辑器与组件扩展](/plugin-dev/editor) |
 
 ::: warning 校验规则（不满足会被拒装）
@@ -57,7 +57,7 @@ manifest 是插件的身份证与说明书。同一个结构有两种载体：
 
 ## contributions 一览
 
-`contributions` 下共有十类声明面。每类都是数组，可以声明多条。
+`contributions` 下共有九类声明面。每类都是数组，可以声明多条。
 
 | 字段 | 作用 | 关键字段 | 详见 |
 | --- | --- | --- | --- |
@@ -70,7 +70,10 @@ manifest 是插件的身份证与说明书。同一个结构有两种载体：
 | `editors` | 按扩展名接管文件编辑器 | `id`、`extensions[]`、`source`/`sourceFile` | [编辑器与组件扩展](/plugin-dev/editor) |
 | `fileTreeMenus` | 文件树右键菜单项 | `id`、`label`、`extensions[]`、`uiKey`/`tool` | [面板与界面扩展](/plugin-dev/panels) |
 | `toolHooks` | 工具调用前后的钩子（pre 可拦截） | `id`、`on`、`toolPattern`、`tool` | [插件里的 MCP 服务器](/plugin-dev/mcp-servers) |
-| `diy`（顶层） | 组件覆盖与槽位覆盖，v1 兼容 | `overrides[]`、`slotOverrides[]` | [编辑器与组件扩展](/plugin-dev/editor) |
+
+::: tip `diy` 不在 `contributions` 里
+上表是 `contributions` 的九个键（`src/types/plugin-v2.ts` 里的 `PluginContributions` 就这九个）。**组件覆盖与槽位覆盖不是其中一个**——`diy`（`overrides[]` / `slotOverrides[]`，v1 兼容）挂在包文件的**顶层**，与 `contributions` 平级。见 [编辑器与组件扩展](/plugin-dev/editor)。
+:::
 
 ## 字段类型不可信：渲染前必须归一化
 
