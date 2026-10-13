@@ -27,12 +27,12 @@ AI 对话、AI 补全、专家——所有 AI 能力的总开关都在一个地�
 
 ![服务商选择](/shots/guide/ai-provider-picker.png)
 
-四类卡片，共 22 张：
+顶部先摆三张**置顶卡**（OpenAI、Anthropic 各占一整行，右侧是「自定义」），下面按四类分组，共 23 张：
 
 | 类别 | 有哪些 |
 | --- | --- |
 | **云端 AI** | OpenAI、DeepSeek、智谱 GLM、月之暗面、通义千问、Grok、Perplexity、MiniMax、百川、硅基流动、小米 MiMo、火山方舟、Anthropic |
-| **代码专用** | 智谱代码版、DeepSeek Coder、通义代码版、阿里云百炼 Coding、Qwen Coding Plan、OpenAI Codex |
+| **代码专用** | 智谱代码版、DeepSeek Coder、通义代码版、阿里云百炼 Coding、百炼 Coding (Claude 协议)、OpenAI Codex |
 | **本地** | Ollama、LM Studio |
 | **自定义** | 自定义兼容（填 Base URL，可选 OpenAI / Anthropic 协议）、自定义 Coding |
 
