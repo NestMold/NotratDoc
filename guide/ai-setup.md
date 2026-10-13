@@ -21,7 +21,7 @@ AI 对话、AI 补全、专家——所有 AI 能力的总开关都在一个地�
 
 在这页点**「开始配置」**（已经有服务商时，用页头的**「添加」**），进入三步向导：
 
-![添加服务商](/shots/guide/ai-add-provider.png)
+![服务商列表与添加入口](/shots/guide/ai-add-provider.png)
 
 ### ① 选服务商
 
@@ -106,7 +106,34 @@ AI 页列着所有配好的服务商，每张卡可以：
 
 ### 导入配置
 
-如果你在别处有一份服务商配置，可以用**导入**直接贴进来，不用一个个手填。
+如果你在别处有一份服务商配置，点**「已有配置链接？导入」**直接贴进来，不用一个个手填。它认两种东西：
+
+- `notrat://import-ai?...` 形式的**配置链接**（NewAPI 这类站点会给出一键导入链接）
+- 一段 **JSON 配置**（自己攒的也行）
+
+## 自动识别本机已有的 AI 工具
+
+电脑上已经装了别的 AI 编程工具、并且配好了 Key 的话，Notrat **启动时会扫一遍**，认得出来的直接变成 AI 页里的一个服务商——不用重新填一遍。
+
+| 本机工具 | 读的是哪份配置 |
+| --- | --- |
+| **Claude Code** | `~/.claude/settings.json` 的 `ANTHROPIC_BASE_URL` / `ANTHROPIC_AUTH_TOKEN`（模型偏好取自 `~/.claude.json`） |
+| **Codex** | `~/.codex/config.toml` + `~/.codex/auth.json` |
+| **OpenClaw / QClaw** | `~/.openclaw/openclaw.json` / `~/.qclaw/openclaw.json` 里的 `models.providers` |
+| **Qoder** | `~/.qoder/config.yaml` 的 `llm:` 段 |
+| **其它**（WorkBuddy、ZCode、DSH、CodeBuddy、Cursor、Trae 等） | 候选目录里的常见配置文件，通用抓一遍地址 / Key / 模型 |
+
+认得出来的样子：AI 页里多出一条**名字就是工具名**的服务商（比如「Claude Code」）。它和手建的条目一模一样——能编辑、能设为当前、能删。
+
+三条要知道的规矩：
+
+- **不覆盖你手建的**：同一个「协议 + 地址」你已经配过，就不再重复导入
+- **同源条目每次启动按外部配置重建**：你在 Claude Code 里换了中转地址，Notrat 这边下次启动跟着换；你在这条上挑过的模型会保留（外部配置里已经没有的模型除外）
+- **扫不到就静默跳过**：整个过程是尽力而为，不影响启动
+
+::: tip 导入来的 Key 也只在你的电脑上
+读的是本机配置文件里的那个 Key，落到 Notrat 这边仍然只存在本机——规则和手填的一样，见下面「Key 存在哪」。
+:::
 
 ## Key 存在哪
 

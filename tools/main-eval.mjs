@@ -52,7 +52,8 @@ const evaluate = async (expression) => {
     returnByValue: true,
     awaitPromise: true,
     includeCommandLineAPI: true,
-    replMode: true,
+    // 注意：别开 replMode —— 开了之后「返回 Promise 的表达式」一律序列化成 {}，
+    // capturePage 这类必须 await 的调用就全废了（--cap 一直返回空对象）。
   });
   if (r.exceptionDetails) throw new Error("exception: " + (r.exceptionDetails.exception?.description || JSON.stringify(r.exceptionDetails)));
   return r.result.value;
@@ -82,12 +83,13 @@ if (cmd === "--show") {
   const out = args[0];
   const want = args[1];
   const r = await evaluate(`(async () => {
+    const REQ = (process.mainModule || {}).require || require;
     const { BrowserWindow } = ${GET_ELECTRON};
     const ws = BrowserWindow.getAllWindows().filter(w => !w.isDestroyed());
     const w = ${want ? `ws.find(x => String(x.webContents.id) === ${JSON.stringify(want)}) || ws[0]` : "ws[0]"};
     const img = await w.webContents.capturePage();
     const sz = img.getSize();
-    const { writeFileSync } = require("fs");
+    const { writeFileSync } = REQ("fs");
     writeFileSync(${JSON.stringify(out)}, img.toPNG());
     return { id: w.id, title: w.getTitle(), size: sz, bytes: img.toPNG().length, list: ws.map(x => ({ id: x.id, t: x.getTitle().slice(0,40), vis: x.isVisible() })) };
   })()`);
