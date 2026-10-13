@@ -170,10 +170,7 @@ export default defineConfig({
       { icon: "github", link: "https://github.com/NestMold/NotratDoc" },
     ],
 
-    footer: {
-      message:
-        'Notrat · 本地优先的 AI 工作台　·　<a href="https://notrat.cn" target="_blank" rel="noreferrer">软件官网 notrat.cn</a>',
-      copyright: "© 2026 巢墨科技工作室 / NestMold",
-    },
+    // 页脚改由 .vitepress/theme/Footer.vue 渲染（Layout.vue 的 layout-bottom 插槽），
+    // 内容还是原来那两行 + 三组快捷链接；themeConfig.footer 留着会渲染出两个页脚，别再开。
   },
 });

@@ -198,8 +198,7 @@ html {
 }
 body,
 .Layout,
-.VPDoc,
-.VPFooter {
+.VPDoc {
   background-color: transparent;
 }
 .dark html,
@@ -645,13 +644,122 @@ html .VPDoc .content-container {
   color: var(--nr-ink);
   font-weight: 650;
 }
-.VPFooter {
+/* ==========================================================================
+   页脚（theme/Footer.vue，自绘；themeConfig.footer 已撤，别从 config 里再加回来）
+   ========================================================================== */
+.nr-footer {
   border-top: 1px solid var(--nr-line);
+  padding: 40px 24px 26px;
 }
-.VPFooter .message,
-.VPFooter .copyright {
+/* 有侧栏的页面不显示页脚 —— 跟内置 VPFooter 的 .has-sidebar{display:none} 同口径。
+   理由不是照抄：侧栏是 fixed 的高条，全宽页脚从它底下穿过去会叠字（实测），
+   而文档页底部本来就有「上一篇 / 下一篇」在收尾。 */
+html:has(.VPSidebar) .nr-footer {
+  display: none;
+}
+.nr-footer-inner {
+  max-width: 1152px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 28px 64px;
+}
+.nr-footer-brand {
+  min-width: 200px;
+}
+.nr-footer-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--nr-ink);
+}
+.nr-footer-lockup:hover {
+  color: var(--nr-ink);
+}
+.nr-footer-logo {
+  width: 22px;
+  height: 22px;
+}
+/* logo 是深蓝描线，暗档反白（同导航栏的做法） */
+.dark .nr-footer-logo {
+  filter: brightness(0) invert(1);
+}
+.nr-footer-brand p {
+  margin: 10px 0 0;
   font-size: 13px;
   color: var(--nr-ink-3);
+}
+.nr-footer-nav {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(96px, max-content));
+  gap: 24px 72px;
+}
+.nr-footer-col h3 {
+  margin: 0 0 12px;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--nr-ink);
+}
+.nr-footer-col ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 9px;
+}
+.nr-footer-col a {
+  font-size: 14px;
+  color: var(--nr-ink-2);
+  text-decoration: none;
+  transition: color 0.18s var(--nr-ease);
+}
+/* 悬停 = 书上划一道荧光笔（和侧边栏选中同一套语言） */
+.nr-footer-col a:hover {
+  color: var(--nr-ink);
+  text-decoration: underline;
+  text-decoration-color: var(--nr-hl);
+  text-decoration-thickness: 5px;
+  text-underline-offset: -1px;
+  text-decoration-skip-ink: none;
+}
+.nr-footer-bottom {
+  margin-top: 34px;
+  padding-top: 18px;
+  border-top: 1px solid var(--nr-line);
+  align-items: center;
+  font-size: 13px;
+  color: var(--nr-ink-3);
+  gap: 12px 24px;
+}
+.nr-footer-top {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 13px;
+  color: var(--nr-ink-3);
+  cursor: pointer;
+  transition: color 0.18s var(--nr-ease);
+}
+.nr-footer-top:hover {
+  color: var(--nr-ink);
+}
+@media (max-width: 720px) {
+  .nr-footer {
+    padding-top: 32px;
+  }
+  .nr-footer-inner {
+    flex-direction: column;
+    gap: 26px;
+  }
+  .nr-footer-nav {
+    gap: 24px 40px;
+  }
 }
 
 /* ==========================================================================
