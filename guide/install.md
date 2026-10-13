@@ -70,18 +70,19 @@ Notrat 用它来加密保存你的 API Key，这本该由系统信任的开发�
 **AppImage（推荐，免安装）**
 
 ```bash
-chmod +x Notrat-1.3.5-x86_64.AppImage
-./Notrat-1.3.5-x86_64.AppImage
+# 文件名里的版本号以你实际下载到的为准
+chmod +x Notrat-<版本>-x86_64.AppImage
+./Notrat-<版本>-x86_64.AppImage
 ```
 
 **deb / rpm**
 
 ```bash
 # Debian / Ubuntu
-sudo dpkg -i notrat_1.3.5_amd64.deb
+sudo dpkg -i notrat_<版本>_amd64.deb
 
 # Fedora / RHEL
-sudo rpm -i notrat-1.3.5_x86_64.rpm
+sudo rpm -i notrat-<版本>_x86_64.rpm
 ```
 
 ::: tip
