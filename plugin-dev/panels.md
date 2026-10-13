@@ -167,6 +167,12 @@ title: 面板与界面扩展
 
 > 上表是 `ui[]` 的 `component`。**`sidebar[]` 的 `component` 只有 `source` / `dataTool` / `refreshMs` 三个字段**，没有 `sourceFile` 与 `fullBleed`。
 
+一句话说清这条边界：**插件带入声明与逻辑，宿主提供运行时**。面板能拿到什么（`props.serverId`、`props.ctx`、`window.electronAPI`）全部来自宿主在运行态边界上的注入——下图是这条边界的全景：
+
+![Notrat 插件运行时架构：插件带入的三个文件（manifest / MCP 服务器 / 面板）经 props 接口进入 Notrat Runtime，宿主提供 AI 网关、终端、文件系统等核心服务](/shots/plugin-dev/plugin-system-arch.png)
+
+橙色 = 插件开发者带入（manifest / server / panel），蓝色 = Notrat 宿主提供；边界上是 props 注入的接口。上半场是插件侧的三个文件各自被宿主接管的入口（注册清单、spawn 子进程、编译面板），下半场左边是宿主内部实现、右边是它在边界上暴露出来的四个 props 入口——`props.serverId`、`props.ctx.ai`、`props.ctx.workspace`、`window.electronAPI`。
+
 组件收到的 props：
 
 | prop | 说明 |

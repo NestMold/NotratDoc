@@ -55,6 +55,21 @@ Notrat 的插件不是「往应用里注入代码」，而是**一份 JSON 声�
 
 ## 整体架构
 
+左边是跑在外部的插件，中间是唯一的运行态边界，右边是 Notrat 运行时本体：
+
+![Notrat 插件系统全景架构：外部插件生态、运行态边界（JSON-RPC / HTTP SSE / CDP Protocol）与 Notrat Runtime 四层](/shots/plugin-dev/plugin-ecosystem-arch.png)
+
+怎么读这张图：
+
+- **左区 · 插件生态（外部）** —— 三个已上线插件是接入样例：每个插件就是「manifest 声明 + MCP 服务器 + 面板」的组合，按需带走能力（Flow 带面板与工作流，一稿多投额外带 CDP 浏览器控制）。
+- **中缝 · 运行态边界** —— 三条协议通道：JSON-RPC（工具调用）、HTTP SSE（AI 流式对话）、CDP Protocol（浏览器自动化）。插件与宿主只经这条边界通信，互不渗透。
+- **Ⅰ 插件生命周期** —— 四步接力：chokidar 监听插件目录发现变更 → Plugin Registry 注册六类贡献 → MCP Manager spawn 独立子进程 → Component Compiler 把面板 TSX 编译成可渲染组件并回注册表。
+- **Ⅱ 内置服务** —— 插件可调用的八大宿主服务（AI 网关 / 终端 / 文件系统 / 知识库 / 技能市场 / 定时任务 / 跨插件调用 / 匿名身份），全部经 `props.serverId`、`props.ctx`、`window.electronAPI` 三个入口暴露。
+- **Ⅲ AI 网关** —— 各服务商直连 + SSE 流式；插件不再向用户要第二遍 API Key，直接经 `props.ctx.ai` 复用宿主已配好的服务商。
+- **Ⅳ 安全边界** —— 三道防线：MCP 子进程沙箱（插件崩溃不伤宿主）、esbuild 黑名单门禁（编译期拦截越权）、匿名身份（不含原始用户 ID）。
+
+同一个系统的另一种画法（插件带入什么、宿主提供什么，边界上是哪些 props 接口），见 [面板与界面扩展](/plugin-dev/panels#component-——-tsx-组件)。
+
 ```text
 插件包（单文件 JSON 或 目录包 zip）
 ├── manifest       id · name · version · contributions / mcpServers
