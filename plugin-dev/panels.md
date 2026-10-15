@@ -44,6 +44,7 @@ title: 面板与界面扩展
 | `content` | 面板内容，见下方四种类型 |
 | `openMode` | 可选，`"default"` 或 `"page"`：触发位（活动栏 / 状态栏 / 侧边栏工具栏）点击时是弹窗还是**直接开成主区整页**。用户在面板右键里设过的打开方式优先于它 |
 | `extensions` | 可选，文件类型过滤（小写、不含点）。当前由 `location: "outline"` 消费：只有当前打开文件的扩展名命中时该面板才出现，未声明 = 始终显示 |
+| `window` | 可选，仅 `location: "window"` 有意义：独立桌面窗口的默认参数（尺寸、透明度、置顶、鼠标穿透……）。见下方「独立桌面窗口」 |
 
 ## 位置一览
 
@@ -61,9 +62,10 @@ title: 面板与界面扩展
 | `editor-tabs` | 标签栏按钮（文件标签右侧） | 点击呼出弹窗或整页 |
 | `editor-header` | 标题栏控制带（「编辑｜源码」那一条） | 与内置控制器并排，点击呼出弹窗或整页 |
 | `widget` | 桌面悬浮器窗口（独立窗口） | 常驻，**不支持被用户改位置** |
+| `window` | **独立桌面窗口**：每个面板一个真窗口，可透明、置顶、鼠标穿透，位置尺寸记忆 | 常驻，窗口自带标题条（拖拽 / 锁定 / 设置 / 关闭）；桌面上最多同时开 6 个 |
 | `page` | 完整主区标签页（像文件标签一样切换、关闭） | 由插件箱点开 |
 
-共 13 个可声明位置；其中 12 个可被用户互移（`widget` 是独立窗口，不在移动目标里）。
+共 14 个可声明位置；其中 13 个可被用户互移（`widget` 是独立窗口，不在移动目标里）。
 
 ::: tip 编辑器里的模式切换别用 editor-tabs
 如果你想让用户切换当前这个文件的源码/可视化模式，用 `editors[].dualView` 或 `modes`，它跟着编辑器走、切文件自动显隐。[编辑器与组件扩展](/plugin-dev/editor) 里有说明。
@@ -243,11 +245,94 @@ export default function MyPanel(props) {
 - `fullBleed: true` 让组件铺满主区（去内边距与面板外壳），画布类组件要自己管内边距。
 - 用户也可以把任何面板右键改成整页打开，或把整页面板搬回其他位置，manifest 里声明的只是默认值。
 
+## 独立桌面窗口：location: "window"
+
+`location: "window"` 让面板**从应用里搬出来**，成为一个真正的操作系统窗口（不是应用内的浮层）。一个面板一个窗口、窗口参数逐面板独立 —— 凡是「想让这个面板一直杵在桌面上」的就用它：桌面挂件、待办清单、监控小窗都算这一类。
+
+```json
+{
+  "contributions": {
+    "ui": [
+      {
+        "id": "todo",
+        "title": "待办清单",
+        "icon": "✅",
+        "location": "window",
+        "content": { "type": "component", "sourceFile": "panels/todo.tsx", "fullBleed": true },
+        "window": {
+          "width": 260,
+          "height": 260,
+          "opacity": 0.85,
+          "transparent": true,
+          "alwaysOnTop": true,
+          "clickThrough": false,
+          "resizable": false,
+          "dragBar": true
+        }
+      }
+    ]
+  }
+}
+```
+
+`window` 里能写什么（都是可选，不写就用下面这行的默认值）：
+
+| 字段 | 类型 | 默认 | 说明 |
+| --- | --- | --- | --- |
+| `width` / `height` | number | 380 / 480 | 首次打开的窗口尺寸（px）。上限 1600×1200、下限 160×120，越界会被夹回来 |
+| `minWidth` / `minHeight` | number | 160 / 120 | 用户手动缩放时的下限 |
+| `x` / `y` | number | 不写 | 首次出现的位置（不写就交给系统摆）；会被夹进屏幕可见区域内 |
+| `opacity` | number | 0.92 | 整窗不透明度，最低 0.2（再低就点不着了） |
+| `transparent` | boolean | true | 窗口背景透明（做透明挂件要它）。**开透明就等于无边框**，写 `frameless: false` 也会被无视 |
+| `frameless` | boolean | true | 无系统标题栏（用面板自带的标题条拖拽） |
+| `alwaysOnTop` | boolean | true | 常驻最前（含跨虚拟桌面） |
+| `clickThrough` | boolean | false | 鼠标穿透：点击落到桌面/下层窗口上。开着的时候**只有**顶部标题条还会接管鼠标，拖它或点设置就能恢复操作 |
+| `resizable` | boolean | true | 允许用户拖边缩放 |
+| `skipTaskbar` | boolean | true | 不在任务栏 / Dock 里占位 |
+| `dragBar` | boolean | true | 顶部标题条显示为拖拽把手 |
+
+几个要点：
+
+- **用户永远优先**：用户在窗口上改的透明度、位置、尺寸会另存一份（用户级），下次打开按用户的来；manifest 里写的是「开发者的默认值」。
+- **位置尺寸会自动记忆**：用户把窗口拖到哪儿，下次就开在哪儿（被显示器拔掉/分辨率变化夹回可见区）。
+- **上次开着的会自己开回来**：退出时开着的插件窗口，下次启动应用时复原。
+- **面板壳与设置是自带的**：你只管写组件内容，标题条、设置面板（不透明度 / 置顶 / 穿透 / 重置尺寸 / 拉回屏内）由宿主提供。
+- **主题跟随**：窗口里的组件跑在同一个 React 树与主题上下文里，用 `bg-background` / `text-foreground` 这类语义 class 就跟着用户主题走；自己写死颜色会在暗色主题下瞎。用了 `transparent` 时记得让面板内容自己带圆角和背景，否则内容会直接浮在桌面上。
+- **组件里能拿到的**：与其它位置一致（`props.pluginId`、面板自身的信息）。
+- 用户在插件箱里对它的右键菜单会多一条「打开独立窗口 / 改到独立窗口打开」，也能从「移动到…」把它搬回应用内。
+
+### 运行时调窗口：window.notratPluginWindow
+
+面板自己的代码也能改本窗参数（比如「贴到桌面边缘时自动变半透明」这种随状态变化的外观）。只在 `location: "window"` 的窗口里有这个全局对象：
+
+```ts
+// 面板组件里，任何时机
+const opts = await window.notratPluginWindow?.setOptions({ opacity: 0.6 });
+window.notratPluginWindow?.setOptions({ clickThrough: true });   // 点桌面不点我
+window.notratPluginWindow?.close();                               // 自己关掉自己
+```
+
+| 成员 | 说明 |
+| --- | --- |
+| `key` | 本窗身份 `<插件id>:<面板id>`（只读） |
+| `getOptions()` | 当前生效的完整参数 |
+| `setOptions(patch)` | 传 `{ opacity, alwaysOnTop, clickThrough, width, height, x, y }` 的子集，生效并返回完整参数（Promise） |
+| `close()` | 关掉本窗 |
+
+- 作用域就是本窗，**不用也不该自己拼 key**；别的插件窗口里拿不到你这扇窗的对象。
+- 与用户在 ⚙ 面板里改走同一条通道（白名单 + 钳位 + 落盘），写进去的值会被记住。
+- 改不了 `transparent` / `frameless` / `skipTaskbar`：窗口已经建出来了，这些只在创建时生效，想变要用户关掉重开。
+- 用户改过的参数以用户为准：你 `setOptions` 相当于替用户改了那个值（下次启动按它开）。要「临时变一下」自己存一份状态、需要时再调回去。
+
+::: tip 别和 widget 搞混
+`widget` = 桌面悬浮器里的一格（一个共享窗口里的多个入口，位置归悬浮器管）；`window` = 自己独占一个真窗口、参数独立。要每个插件各自一份外观时选 `window`。
+:::
+
 ## 面板的位置与样式归用户
 
 manifest 声明的是**默认位置**，用户随时可以覆盖：
 
-- **右键 →「移动到…」**：在 12 个位置之间互移，覆盖持久保存，可一键「恢复默认位置」。
+- **右键 →「移动到…」**：在 13 个位置之间互移，覆盖持久保存，可一键「恢复默认位置」。
 - **语义钩子类名**：面板外壳自带 `.notrat-plugin-panel`（所有插件面板）与 `.notrat-plugin-panel-<插件id>`（某个插件），内部还有 `-header` / `-body`；位置容器带 `.notrat-plugin-slot-<location>`。用户可以在对话里让 AI 调用 Slot 覆盖工具改样式（例如「把这个面板改成半透明」），也可以用 DIY 面板手写。插件作者不需要自己实现样式入口。
 
 ## 斜杠命令：commands
