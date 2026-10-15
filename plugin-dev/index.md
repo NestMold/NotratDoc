@@ -110,8 +110,11 @@ Notrat 的插件不改动应用本体，只是往界面里加面板、往对话�
 | 位置 | 内容 |
 | --- | --- |
 | `examples/plugins/notrat-todo-plugin/` | 完整示例（MCP 服务器 + 命令 + 提示词 + 设置 + 渲染器 + 面板 + 多个 UI 位置 + 工具钩子） |
-| `src/skills/plugin-developer/SKILL.md` | 让 AI 按流程直接写插件的开发技能 |
-| `src/skills/plugin-upload/SKILL.md` | 让 AI 完成打包与上架流程的上传技能 |
+| `src/skills/plugin-developer/SKILL.md` | 内置技能：让 AI 按流程直接写插件，也含打包与上架（见 [打包与发布](/plugin-dev/publish)） |
+
+::: tip 示例是「取样展示」，不是推荐做法
+那份 todo 示例把全部贡献面都铺了一遍，是为了让你一次看到每样长什么样。**一个功能只做一个位置**——同一个面板同时出现在输入框上方、消息区、右侧停靠栏、活动栏，用户得一个个去关。位置由用户要哪个做哪个，而且每个面板他随时能右键「移动到…」自己搬。
+:::
 
 ::: tip 想先看用户视角
 插件在应用里长什么样、入口在哪、怎么安装与更新，见 [插件与扩展市场](/guide/plugins) 与 [扩展管理](/guide/extensions)。
