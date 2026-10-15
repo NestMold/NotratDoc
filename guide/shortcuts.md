@@ -145,4 +145,4 @@ title: 快捷键
 
 ---
 
-**下一站**：[IM 插件（远程助手）](/guide/im-plugin)
+**下一站**：[远程助手](/guide/im-plugin)

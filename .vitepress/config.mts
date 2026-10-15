@@ -83,7 +83,7 @@ export default defineConfig({
         {
           text: "进阶玩法",
           items: [
-            { text: "IM 插件（远程助手）", link: "/guide/im-plugin" },
+            { text: "远程助手", link: "/guide/im-plugin" },
             { text: "图谱", link: "/guide/graph" },
             { text: "悬浮便签与桌面悬浮器", link: "/guide/widgets" },
             { text: "导出与分享", link: "/guide/export" },

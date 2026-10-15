@@ -85,4 +85,4 @@ Notrat 对插件出错做了两层兜底：
 
 ---
 
-**下一站**：[IM 插件（远程助手）](/guide/im-plugin)
+**下一站**：[远程助手](/guide/im-plugin)
