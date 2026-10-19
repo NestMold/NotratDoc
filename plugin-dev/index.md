@@ -101,7 +101,7 @@ Notrat 的插件不改动应用本体，只是往界面里加面板、往对话�
 4. [插件里的 MCP 服务器](/plugin-dev/mcp-servers)：工具怎么暴露、环境变量与占位符、多窗口的 `workspace` 参数。
 5. [编辑器与组件扩展](/plugin-dev/editor)：接管文件、多模式切换、大纲对接、组件覆盖。
 6. [调试与日志](/plugin-dev/debug)：日志三落点、离线校验面板、常见错误对照表。
-7. [打包与发布](/plugin-dev/publish)：两种包形态、版本号规则、上传到插件市场。
+7. [打包与发布](/plugin-dev/publish)：两种包形态、版本号规则、官方审核与社区 topic 上架。
 
 ## 参考实现
 
