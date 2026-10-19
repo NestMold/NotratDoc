@@ -33,6 +33,7 @@ my-plugin/
   "name": "我的插件",
   "version": "1.0.0",
   "description": "一个最小可跑的 Notrat 插件：在聊天输入框上方显示当前工作区。",
+  "icon": "lucide:LayoutDashboard",
   "type": "feature",
   "manifestVersion": 2,
   "enabled": true,
@@ -60,6 +61,7 @@ my-plugin/
 - `manifestVersion: 2` 是包版本标记。**当前客户端不据此分流**：写 `1`、写 `2`、不写，`contributions` 一样会被读取（仍建议写 `2`）。
 - `enabled` 是磁盘上的开关字段。手动把插件拷进 `~/.notrat/plugins/` 时**必须写 `enabled: true`**，否则插件会被装进来但不启用；从插件市场安装时安装器会自动补上（除非你显式写了 `enabled: false`）。
 - `content.sourceFile` 是相对包根的路径，主进程读盘时会把它内联成源码，磁盘上保留引用即可，方便你用编辑器改这份真文件。
+- 顶层 `icon` 推荐 `lucide:<名称>`（与 Notrat 本体同款线性图标）；用户给图片时用栅格 data URI，别写相对路径。`ui[].icon` 是面板自己的小图标（emoji/短文本），和顶层包图标不是一回事。
 
 ## 3. 写面板 panels/main.tsx
 
@@ -135,6 +137,7 @@ Windows 上是 `C:\Users\<你>\.notrat\plugins\`。Notrat 启动时会扫描这�
   "id": "my-plugin",
   "name": "我的插件",
   "version": "1.0.0",
+  "icon": "lucide:LayoutDashboard",
   "type": "feature",
   "manifestVersion": 2,
   "contributions": {

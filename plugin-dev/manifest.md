@@ -20,7 +20,7 @@ manifest 是插件的身份证与说明书。同一个结构有两种载体：
 | `version` | `string` | 是 | 点分数字版本号，客户端的更新检测靠它逐段比大小，**必须严格递增** | `"1.0.0"` |
 | `description` | `string` | 否 | 一句话说明，装在插件卡片与市场条目上 | `"给 Notrat 加一个待办面板"` |
 | `author` | `string` | 否 | 作者名。**只写字符串**，别写 npm 风格的对象（见下方「字段类型不可信」） | `"某某工作室"` |
-| `icon` | `string` | 否 | 包级图标：emoji 或图片 URL（http/https）。缺省时回落第一个 UI 面板贡献的 `icon`，再回落 🧩 | `"🧩"` |
+| `icon` | `string` | 否 | 包级图标：推荐 `lucide:<名称>`（与 Notrat 本体同款线性图标）；也支持栅格 data URI、http(s) 图片 URL、emoji（老包兼容）。缺省时回落第一个 UI 面板贡献的 `icon`，再回落 `lucide:Puzzle`。名称白名单见 `src/utils/pluginIcon.ts` | `"lucide:Puzzle"` |
 | `type` | `"theme"` \| `"feature"` \| `"bundle"` | 否 | `theme` = 纯样式、`feature` = 含逻辑、`bundle` = 混合。缺省 `bundle` | `"feature"` |
 | `manifestVersion` | `1` \| `2` | 否 | 包版本标记。**当前客户端不据此分流**：写 `1`、写 `2`、不写，`contributions` 一样会被读取（建议写 `2`） | `2` |
 | `notrat` | `object` | 否 | `{ "minVersion": "1.3.0" }`：声明所需的最低应用版本。当前客户端不依据它拦截，市场的版本门槛来自注册表条目的 `min_app_version`（在插件详情页展示） | `{ "minVersion": "1.3.0" }` |
@@ -92,7 +92,7 @@ Notrat 自己的做法是：所有来自插件 manifest 的展示字段统一过
 1. 字符串：去掉首尾空白后直接用。
 2. 数字：转成字符串。
 3. 对象：依次尝试 `name` / `label` / `title` / `text`，取第一个非空字符串。
-4. 都不行：返回空字符串，由调用侧给兜底文案（例如名字回落 `id`、图标回落 🧩）。**不做 `JSON.stringify`**。界面上摆一坨 `{"name":"x"}` 比不显示更糟。
+4. 都不行：返回空字符串，由调用侧给兜底文案（例如名字回落 `id`、图标回落 `lucide:Puzzle`）。**不做 `JSON.stringify`**。界面上摆一坨 `{"name":"x"}` 比不显示更糟。
 
 插件作者侧的结论很简单：该写字符串的字段就写字符串。从 npm 风格 manifest 迁移过来时，记得把这些字段拍平。除 `author` 之外，`icon`、面板的 `title`、设置的 `label`、编辑器的 `label` 都可能被下游当作纯文本渲染，同样别塞对象。
 
@@ -111,7 +111,7 @@ Notrat 自己的做法是：所有来自插件 manifest 的展示字段统一过
   "version": "1.0.0",
   "description": "演示目录包的 manifest 写法。",
   "author": "某某工作室",
-  "icon": "🧩",
+  "icon": "lucide:Puzzle",
   "type": "feature",
   "manifestVersion": 2,
   "enabled": true,
@@ -153,7 +153,7 @@ Notrat 自己的做法是：所有来自插件 manifest 的展示字段统一过
       {
         "id": "main",
         "title": "我的面板",
-        "icon": "🧩",
+        "icon": "📋",
         "location": "sidebar-input",
         "content": {
           "type": "component",
