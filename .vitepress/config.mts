@@ -3,6 +3,9 @@ import { defineConfig } from "vitepress";
 // 部署根路径：GitHub Pages / Gitee Pages 的项目页都带子路径（/NotratDoc/ 之类），
 // 绑上自定义域名（docs.notrat.cn）后站点在根上，改成 "/" 即可。构建时用环境变量给。
 const base = process.env.DOCS_BASE || "/";
+// 离线副本（随应用打包）用 cleanUrls:false：静态文件服务器没有「无扩展名 →
+// path.html」的改写，链接必须带 .html 才能直接打开。线站保持 cleanUrls。
+const cleanUrls = process.env.DOCS_CLEAN_URLS !== "false";
 
 export default defineConfig({
   title: "Notrat 文档",
@@ -10,7 +13,7 @@ export default defineConfig({
   description: "本地优先的 AI 工作台 —— 使用教程、插件开发、平台文档与版本更新记录",
   lang: "zh-CN",
   lastUpdated: true,
-  cleanUrls: true,
+  cleanUrls,
   ignoreDeadLinks: true, // 文档仍在补写，允许暂缺的交叉引用
   head: [
     // head 里的绝对路径 VitePress 不会自动加 base（导航链接、logo、markdown 里的图会自动加），
