@@ -83,7 +83,7 @@ node build-release.mjs 1.2.0
 | --- | --- |
 | 插件本体 | 完整 manifest，或可访问的下载链接。带 `${pluginDir}` / `sourceFile` 这类包内真文件的，交 **zip 目录包**：`manifest.json` 放 zip 根目录，id 与目录名一致 |
 | 说明材料 | 一句话功能介绍 + 权限用途说明 + 开源地址（如有） |
-| 条目展示信息 | `icon`、`category`、`tags`、`readme`（详情页正文）随包一起交，审核通过后录入注册表 |
+| 条目展示信息 | `icon`、`category`、`tags`、`readme`（详情页正文）随包一起交，审核通过后录入注册表。上架前先确认 `icon`：默认沿用 `manifest.icon`；要单独换图就给一张 1:1 PNG/WebP 的**公网 https 地址**（注册表只收 URL，data URI 填不进去） |
 
 审核通过后由官方完成上架：包入库 → 计算 SHA-256 → 写入注册表（每个版本带哈希与 `downloadUrl`）→ 详情页的权限预览自动生成。之后发新版，就是把新版本插到队首，旧版本仍可下载。
 
@@ -99,6 +99,7 @@ node build-release.mjs 1.2.0
 - 最小字段：`id`、`name`、`version`、`description` 非空；`contributions`（对象）或 `mcpServers`（数组）至少有一个且形状正确。
 - 抓不到 manifest 的仓库**不会出现在货架**（网络失败与根目录没有 manifest 同口径，一律隐藏）；抓到了但字段不合规的仍会列出，标「不符合规范」并禁用安装。
 - **`author` 建议写明**：字符串 `"张三"`，或对象 `{ "name": "张三", "url": "https://…" }`（详情页可点主页）。不写会回落成仓库所有者；**不要写「Notrat」「Notrat Community」「巢墨科技」等平台名冒充官方**，社区条目免审核，署平台名会让所有插件看起来同源。
+- **`icon` 会被货架卡片直接读取**：客户端从仓库根目录的 `manifest.json` 取 `icon`，支持 `lucide:<白名单>`、栅格 data URI、emoji（老包兼容）和 http(s) 图片 URL。社区货架不另收图标，写好 `manifest.icon` 即可；发布包里优先内联 data URI，别依赖远端图片（热链保护/断网会空白）。
 - `id` 是插件身份，换 id 等于换一个插件；同一台机器上别让目录包和单文件包用同一个 id 混装（目录包优先）。
 
 ### 第 2 步：给仓库打 topic

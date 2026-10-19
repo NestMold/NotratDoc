@@ -57,13 +57,13 @@ title: 面板与界面扩展
 | `popup` | 居中弹窗 | 由插件箱 / 触发入口呼出 |
 | `floating` | 可拖拽悬浮窗 | 常驻，标题栏可拖；**拖出应用窗口再松手 = 转为独立桌面窗口**（落到拖放位置） |
 | `sidebar-toolbar` | 侧边栏工具栏按钮 | 点击呼出弹窗（或整页） |
-| `activity-bar` | 左侧活动栏按钮 | 点击呼出弹窗（或整页） |
+| `activity-bar` | 左侧活动栏按钮；图标取 `manifest.icon`，放不下折进「更多」菜单时也是同一枚 | 点击呼出弹窗（或整页） |
 | `status-bar` | 底部状态栏徽章 | 点击呼出弹窗（或整页） |
 | `outline` | 左侧大纲面板（标题列表下方） | 常驻，适合文档导航与结构类工具 |
 | `editor-tabs` | 标签栏按钮（文件标签右侧） | 点击呼出弹窗或整页 |
 | `editor-header` | 标题栏控制带（「编辑｜源码」那一条） | 与内置控制器并排，点击呼出弹窗或整页 |
 | `widget` | 桌面悬浮器窗口（独立窗口） | 常驻，**不支持被用户改位置** |
-| `window` | **独立桌面窗口**：每个面板一个真窗口，可透明、置顶、鼠标穿透，位置尺寸记忆 | 常驻，窗口自带标题条（拖拽 / 锁定 / 设置 / 关闭）；桌面上最多同时开 6 个 |
+| `window` | **独立桌面窗口**：每个面板一个真窗口，可透明、置顶、鼠标穿透，位置尺寸记忆 | 常驻，窗口自带标题条（拖拽 / 锁定 / 设置 / 关闭，**展示哪些由开发者在 manifest 里决定**）；桌面上最多同时开 6 个 |
 | `page` | 完整主区标签页（像文件标签一样切换、关闭） | 由插件箱点开 |
 
 共 14 个可声明位置；其中 13 个可被用户互移（`widget` 是独立窗口，不在移动目标里）。
@@ -302,7 +302,12 @@ export default function MyPanel(props) {
           "alwaysOnTop": true,
           "clickThrough": false,
           "resizable": false,
-          "dragBar": true
+          "dragBar": true,
+          "showControlBar": true,
+          "showTitle": false,
+          "showLockButton": false,
+          "showSettingsButton": true,
+          "showCloseButton": true
         }
       }
     ]
@@ -324,15 +329,27 @@ export default function MyPanel(props) {
 | `clickThrough` | boolean | false | 鼠标穿透：点击落到桌面/下层窗口上。开着的时候**只有**顶部标题条还会接管鼠标，拖它或点设置就能恢复操作 |
 | `resizable` | boolean | true | 允许用户拖边缩放 |
 | `skipTaskbar` | boolean | true | 不在任务栏 / Dock 里占位 |
-| `dragBar` | boolean | true | 顶部标题条显示为拖拽把手 |
+| `dragBar` | boolean | true | 顶部控制栏显示为拖拽把手（`false` = 控制栏不响应拖动） |
+| `showControlBar` | boolean | 跟随 `dragBar` | 是否显示顶部控制栏。`false` = 面板用满整窗。**由开发者决定**，用户端没有这个开关（右键仍能打开窗口设置调透明度等）。⚠️ 鼠标穿透开启时宿主会强制保留控制栏，否则窗口再也操作不回来 |
+| `showTitle` | boolean | true | 控制栏里是否显示面板标题文字（包图标不受影响） |
+| `showLockButton` | boolean | true | 是否显示「锁定位置」按钮 |
+| `showSettingsButton` | boolean | true | 是否显示「⚙ 设置」按钮（关掉后右键面板仍可唤出窗口设置） |
+| `showCloseButton` | boolean | true | 是否显示「✕ 关闭」按钮 |
 | `rememberGeometry` | boolean | true | 是否记住用户拖出来的位置 / 尺寸。`false` = 每次打开都按本表的 `x` / `y` / `width` / `height`（不写就交给系统）；透明度、置顶、穿透、「上次开着」这些非几何偏好仍照常记忆 |
+
+**控制面由开发者决定**——顶栏展示什么属于面板设计的一部分，用户端没有「显示/隐藏控件」的开关：
+
+- 桌面挂件要整窗铺满、自己画头部 → `showControlBar: false`；需要拖动抓手就保留控制栏，或者只留标题不显示按钮。
+- 只要一部分按钮 → 对应 `show*Button` 设 `false`。`showControlBar: false` 时会连标题和按钮一起收起，窗口设置仍可右键唤出。
+- 鼠标穿透开启时控制栏**强制保留**（否则整窗不吃点击，用户再也关不掉穿透），此时 `showControlBar: false` 不生效。
+- 面板代码还能在运行时改这些字段，见下方 `setOptions`。用户 ⚙ 里始终只有透明度 / 置顶 / 穿透 / 锁定与几何操作。
 
 几个要点：
 
 - **用户永远优先**：用户在窗口上改的透明度、位置、尺寸会另存一份（用户级），下次打开按用户的来；manifest 里写的是「开发者的默认值」。
 - **位置尺寸默认自动记忆**：用户把窗口拖到哪儿，下次就开在哪儿（被显示器拔掉/分辨率变化夹回可见区）。想让窗口每次按 manifest 摆位，声明 `"rememberGeometry": false`——本次运行内仍可拖，只是不落盘。
 - **上次开着的会自己开回来**：退出时开着的插件窗口，下次启动应用时复原。
-- **面板壳与设置是自带的**：你只管写组件内容，标题条、设置面板（不透明度 / 置顶 / 穿透 / 重置尺寸 / 拉回屏内）由宿主提供。
+- **面板壳与设置是自带的**：你只管写组件内容；标题条（展示哪些控件由你决定，见上）、设置面板（不透明度 / 置顶 / 穿透 / 重置尺寸 / 拉回屏内）由宿主提供。**至少留一条操作路径**——关掉控制栏或按钮后，用户仍可右键面板打开窗口设置。
 - **主题跟随**：窗口里的组件跑在同一个 React 树与主题上下文里，用 `bg-background` / `text-foreground` 这类语义 class 就跟着用户主题走；自己写死颜色会在暗色主题下瞎。用了 `transparent` 时记得让面板内容自己带圆角和背景，否则内容会直接浮在桌面上。
 - **组件里能拿到的**：与其它位置一致（`props.pluginId`、面板自身的信息）。
 - 用户在插件箱里对它的右键菜单会多一条「打开独立窗口 / 改到独立窗口打开」，也能从「移动到…」把它搬回应用内。
@@ -352,11 +369,11 @@ window.notratPluginWindow?.close();                               // 自己关�
 | --- | --- |
 | `key` | 本窗身份 `<插件id>:<面板id>`（只读） |
 | `getOptions()` | 当前生效的完整参数 |
-| `setOptions(patch)` | 传 `{ opacity, alwaysOnTop, clickThrough, width, height, x, y }` 的子集，生效并返回完整参数（Promise） |
+| `setOptions(patch)` | 传 `{ opacity, alwaysOnTop, clickThrough, width, height, x, y, showControlBar, showTitle, showLockButton, showSettingsButton, showCloseButton }` 的子集，生效并返回完整参数（Promise） |
 | `close()` | 关掉本窗 |
 
 - 作用域就是本窗，**不用也不该自己拼 key**；别的插件窗口里拿不到你这扇窗的对象。
-- 与用户在 ⚙ 面板里改走同一条通道（白名单 + 钳位 + 落盘），写进去的值会被记住。
+- 与用户在 ⚙ 面板里改透明度 / 置顶 / 穿透走同一条通道（白名单 + 钳位 + 落盘），写进去的值会被记住。控制面五个字段只有 manifest 与面板代码能决定，用户 ⚙ 里没有这些开关。
 - 改不了 `transparent` / `frameless` / `skipTaskbar`：窗口已经建出来了，这些只在创建时生效，想变要用户关掉重开。
 - 用户改过的参数以用户为准：你 `setOptions` 相当于替用户改了那个值（下次启动按它开）。要「临时变一下」自己存一份状态、需要时再调回去。
 
