@@ -55,7 +55,7 @@ const features = [
   {
     icon: ICONS.changelog,
     title: "这一版改了什么？",
-    details: "从 1.2.8 到 1.3.5 的完整更新记录，按版本翻阅。",
+    details: "从 1.0.0 到 1.3.6 的完整更新记录，按版本翻阅。",
     link: "/changelog/",
     linkText: "更新记录",
   },
@@ -122,7 +122,7 @@ function openSearch() {
       </div>
 
       <p class="nr-meta">
-        教程对应 1.3.5<span class="sep">·</span>使用教程 26
+        教程对应 1.3.6<span class="sep">·</span>使用教程 26
         篇<span class="sep">·</span>Windows 10+ / macOS 12+ / Linux
       </p>
     </section>
