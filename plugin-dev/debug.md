@@ -92,14 +92,17 @@ node scripts/plugin-panel-check.mjs --list tool-output.txt
 
 | 报错关键字 | 含义 | 怎么办 |
 | --- | --- | --- |
-| `Command not found: <cmd>` | 电脑上没装这个命令 | 装 Node.js 等运行时，装完**完整重启应用**（新命令要重启才被识别），再点「重载」 |
+| `Command not found: node` | 本机没有可用的 Node：`PATH`、常见安装目录、**应用自带的 Node 20** 三级兜底都失败了 | 装 Node.js 18 以上，装完**完整重启应用**（新命令要重启才被识别），再点「重载」 |
+| `Command not found: npx` / `npm` / `pnpm` / `yarn` / `bun` | 这个包运行器没装。应用内置的 Node **不带** npm / npx，兜底救不了它 | 装对应运行时（或改用自己的脚本 + `node`），完整重启应用后点「重载」 |
 | `Permission denied executing <file>` | 文件存在但没有执行权限 | macOS / Linux 上 `chmod +x` 该文件；Windows 检查文件是否被占用 |
 | `ENOTDIR` / 同名文件被当成了目录 | 启动路径上有个同名文件 | 多半是 `cwd` 留空或指向了文件；把 `cwd` 指向目录（或删掉该字段用默认的插件根目录） |
 | `Library not loaded:` / `error while loading shared libraries:` | 系统的 Node 运行环境坏了（缺动态库） | 这是电脑环境的问题，不是插件的问题；按提示 `brew reinstall` 等修好后点「重载」 |
+| `Cannot use import statement outside a module` | 入口 `.js` 是 ESM 写法，但最近的 `package.json` 没写 `type: "module"`，被当 CJS 解析。应用内置的 Node 20 会这样；用户自装的 Node 22.7+ 可能反而没事 | 在 `server/` 目录放 `{"type": "module"}` 的 `package.json`，或把入口改成 CJS。见 [插件里的 MCP 服务器](/plugin-dev/mcp-servers) |
 | `ERR_MODULE_NOT_FOUND`，路径在 `~/.notrat/plugins/<插件>/` 里 | **插件包没装全**（安装中断留下的半套文件） | 到扩展管理/插件市场重新安装一次，再点「重载」 |
+| `ERR_MODULE_NOT_FOUND`，路径在 `…/npm-cache/_npx/<hash>/` 里 | **npx 缓存只剩半套**（npm 不校验已解包的包，缺文件会一直坏着） | 宿主会**自动删掉那棵 `<hash>` 缓存树、原命令重试一次**。若日志里写着清理失败，手动删掉 `<hash>` 目录（Windows 先确认没有进程占着它）再点「重载」 |
 | `Cannot find module` / `ERR_MODULE_NOT_FOUND`，路径在别处 | 脚本路径写错，或依赖没装 | 检查 `args` 里的路径；依赖类问题在插件自己的目录里装好 |
 | `Invalid MCP config` | 启动信息不全（命令 / 参数 / 地址缺） | 检查 `command` / `args` / `url` 是否都写了 |
-| `Connection timeout` | 服务起来了但不响应 | 点「重载」重试；反复超时看实时日志里它卡在哪 |
+| `Connection timeout (Ns)` | 服务起来了，但在超时时间内没完成握手 | 包运行器（`npx` 等）默认 120 秒、其它命令 30 秒；首次下载慢可以声明 `timeout` 调大。反复超时看实时日志里它卡在哪 |
 | `exited unexpectedly` | 子进程启动后立刻退出 | 展开实时日志看它最后一行；多半缺依赖或缺文件 |
 
 ### 连接阶段（sse / http）
@@ -142,7 +145,7 @@ node scripts/plugin-panel-check.mjs --list tool-output.txt
 - [ ] 服务器用一个 `console.error` 打点，能在「查看日志」里看到同一行。
 - [ ] 故意写错 `command`，能在插件卡片上看到「运行错误」，`yarn log errors --local` 也有对应记录。
 - [ ] 每个工具都能通过 `/plugin-run <插件id> <工具名> {}` 调通。
-- [ ] 面板在**没有工作区**、**服务器未启动**两种情况下不崩（此时 `ctx.workspace` 为空、`serverId` 为空串）。
+- [ ] 面板在**没有工作区**、**不在工作空间**、**服务器未启动**三种情况下不崩（此时 `ctx.workspace` / `ctx.space` 为 `null`、`serverId` 为空串）。
 - [ ] 声明了 `promptSections` 的话，问模型「你有哪些能力」，能提到这段说明。
 - [ ] 设置改一个值，服务器重启后新值生效（例如让工具把 env 打印出来）。
 - [ ] 全流程日志里没有出现任何令牌 / 密钥 / 用户隐私。

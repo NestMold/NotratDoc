@@ -25,13 +25,45 @@ manifest 是插件的身份证与说明书。同一个结构有两种载体：
 | `manifestVersion` | `1` \| `2` | 否 | 包版本标记。**当前客户端不据此分流**：写 `1`、写 `2`、不写，`contributions` 一样会被读取（建议写 `2`） | `2` |
 | `notrat` | `object` | 否 | `{ "minVersion": "1.3.0" }`：声明所需的最低应用版本。当前客户端不依据它拦截，市场的版本门槛来自注册表条目的 `min_app_version`（在插件详情页展示） | `{ "minVersion": "1.3.0" }` |
 | `enabled` | `boolean` | 否 | 磁盘上的开关字段。手动拷进插件目录时必须写 `true`，否则装上但不启用；市场安装器会自动补 `true`（除非显式写 `false`） | `true` |
-| `scope` | `"global"` \| `"workspace"` | 否 | 插件落点：全局目录或当前工作区目录。缺省 `global`，由应用在启用/迁移时写回 | `"global"` |
+| `scope` | `"global"` \| `"space"` \| `"workspace"` | 否 | 插件落点：全局 / 当前工作空间 / 当前工作区。缺省 `global`，由应用在启用、安装到某档范围或迁移时写回；作者一般不用手写 | `"global"` |
 | `mcpServers` | `array` | 否 | 插件自带的 MCP 服务器声明，见下节 | 见下 |
 | `contributions` | `object` | 否 | 九类声明式贡献，见下节 | 见下 |
 | `diy` | `object` | 否 | v1 兼容的组件覆盖与槽位覆盖（**顶层字段，不在 `contributions` 里**） | 见 [编辑器与组件扩展](/plugin-dev/editor) |
 
 ::: tip 包图标会出现在哪些地方
 `manifest.icon` 不只在卡片上：扩展管理列表、插件箱、设置框、市场卡片，以及**活动栏按钮**和它放不下时折进的**「更多」溢出菜单**都用这一枚。活动栏按 20px、菜单按 16px 渲染——选 16px 仍认得出的 `lucide:<名称>`；用户给图片就用**方形、主体居中**的 PNG/WebP。别拿 emoji 当默认：缩到菜单行里会糊，而且缺省回落是 `lucide:Puzzle`，不是 🧩。
+:::
+
+## 图标能写哪几种值
+
+`manifest.icon` 与 `ui[].icon` 走同一套判定（`src/utils/pluginIcon.ts`），支持四种写法：
+
+| 写法 | 长什么样 | 限制 |
+| --- | --- | --- |
+| `lucide:<名称>` | 与 Notrat 本体同款的线性图标 | **只认白名单**（`PLUGIN_LUCIDE_ICONS`，约 90 枚常用语义图标，见下），不是 lucide 全量 |
+| `https://…` / `//cdn…` | 远端图片，渲染时统一 `referrerPolicy="no-referrer"`（防 CDN 热链拦截） | 不超过 4096 字符 |
+| `data:image/png\|jpeg\|webp\|gif\|avif;base64,…` | 内联的栅格图片（推荐发布时内联，断网也在） | 不超过 512KB；**不收 SVG data URI** |
+| emoji / 短文本 | 原样当文字渲染，兼容老 manifest | 不超过 8 个字符 |
+
+`lucide:<名称>` 写了白名单外的名字**不会报错**，只是按「没给图标」处理，回落到 `lucide:Puzzle`。所以别从 lucide 官网随手抄一个名字——先对照白名单。常用的一批：
+
+```text
+Puzzle Sparkles Bot Brain Wand2 Wrench Settings2 Palette Paintbrush
+Image Images Camera Music Video Mic FileText Files Folder FolderOpen
+Archive Package Boxes Database Server Cloud Globe Network GitBranch
+Terminal Code Code2 Cpu Monitor Smartphone LayoutDashboard ChartBar
+ChartLine Table Calendar Clock Timer CheckSquare ListTodo NotebookPen
+BookOpen GraduationCap Search Filter Zap Flame Leaf Heart Star Shield
+KeyRound Lock Mail MessageSquare MessagesSquare Send Bell Rss Link
+ExternalLink Download Upload RefreshCw Repeat Workflow Layers Map MapPin
+Compass Target Trophy FlaskConical TestTube Rocket Lightbulb Bug
+Activity Gauge
+```
+
+::: tip 面板自己的 `ui[].icon` 和包图标不是一回事
+面板标题旁的小图标优先用 `manifest.icon`（包图标），`ui[].icon` 只是这个面板自己的兜底。活动栏按钮、插件箱、市场卡片读的都是**包图标**；只改 `ui[].icon` 时，那些地方看起来不会变。
+
+`fileTreeMenus[].icon` 是另一套：右键菜单里只按 emoji / 短文本渲染（≤3 码位），不认 `lucide:` 前缀。
 :::
 
 ::: warning 校验规则（不满足会被拒装）
@@ -157,7 +189,7 @@ Notrat 自己的做法是：所有来自插件 manifest 的展示字段统一过
       {
         "id": "main",
         "title": "我的面板",
-        "icon": "📋",
+        "icon": "lucide:FileText",
         "location": "sidebar-input",
         "content": {
           "type": "component",

@@ -11,7 +11,7 @@ title: 面板与界面扩展
 两条通道，能力不一样：
 
 - **`contributions.ui[]`**：通用 UI 贡献，用 `location` 指定渲染位置。推荐用它，三种内容类型、`sourceFile` 内联、`fullBleed`、`command` 都在这一条通道上。
-- **`contributions.sidebar[]`**：旧的侧边栏面板（聊天输入框上方），位置等同于 `location: "sidebar-input"`。能力窄一档：内容类型只有 markdown / list / component，`component` 只认内联 `source`，没有 `sourceFile` / `fullBleed` / `command`。
+- **`contributions.sidebar[]`**：旧的侧边栏面板（AI 对话输入框上方），位置等同于 `location: "sidebar-input"`。能力窄一档：内容类型只有 markdown / list / component，`component` 只认内联 `source`，没有 `sourceFile` / `fullBleed` / `command`。
 
 ::: warning 写 `sidebar` 时别用 `sourceFile`
 `sourceFile` 的内联只对 `ui[]` 与 `editors[]` 生效：读盘内联、装前占位符扫描、写回剥离三层都只遍历这两处，完全不碰 `sidebar`。在 `sidebar[]` 里写 `sourceFile` 不会报错，但源码永远不会被内联，面板运行时直接编译失败。
@@ -26,7 +26,7 @@ title: 面板与界面扩展
       {
         "id": "main",
         "title": "我的面板",
-        "icon": "🧩",
+        "icon": "lucide:Puzzle",
         "location": "sidebar-input",
         "content": { "type": "component", "sourceFile": "panels/main.tsx" }
       }
@@ -39,10 +39,10 @@ title: 面板与界面扩展
 | --- | --- |
 | `id` | 插件内唯一，面板的 key 是 `<插件id>:<id>` |
 | `title` | 面板标题，渲染在面板外壳上 |
-| `icon` | 可选，emoji 或短文本 |
+| `icon` | 可选，推荐 `lucide:<白名单名称>`（与 Notrat 同款线性图标）；也支持图片 URL、栅格 data URI 与 emoji。四种写法的限制与白名单见 [manifest 清单参考](/plugin-dev/manifest#图标能写哪几种值) |
 | `location` | 渲染位置，见下表 |
 | `content` | 面板内容，见下方四种类型 |
-| `openMode` | 可选，`"default"` 或 `"page"`：触发位（活动栏 / 状态栏 / 侧边栏工具栏）点击时是弹窗还是**直接开成主区整页**。用户在面板右键里设过的打开方式优先于它 |
+| `openMode` | 可选，`"default"` / `"page"` / `"fullpage"`：触发位（左侧活动栏 / 底部状态栏 / AI 对话工具栏）点击时是弹窗、主区**标签页**，还是**整页**（占满主区、无标签栏，与设置 / 图谱同性质）。用户在面板右键里设过的打开方式优先于它 |
 | `extensions` | 可选，文件类型过滤（小写、不含点）。当前由 `location: "outline"` 消费：只有当前打开文件的扩展名命中时该面板才出现，未声明 = 始终显示 |
 | `window` | 可选，仅 `location: "window"` 有意义：独立桌面窗口的默认参数（尺寸、透明度、置顶、鼠标穿透……）。见下方「独立桌面窗口」 |
 | `floating` | 可选，仅 `location: "floating"` 有意义：应用内悬浮窗的首开位置与「是否记住位置」。见下方「应用内悬浮窗」 |
@@ -51,20 +51,20 @@ title: 面板与界面扩展
 
 | location | 渲染成什么 | 交互方式 |
 | --- | --- | --- |
-| `sidebar-input` | 聊天输入框上方 | 常驻 |
-| `messages-top` | 消息区顶部 | 常驻 |
-| `right-panel` | 右侧**真停靠**的一列（占最右、挤压主区），多面板自动变标签式，宽度可拖 240–560px 并记忆 | 常驻；有插件声明时默认展开，状态栏「插件侧栏」开关或栏内按钮收起 |
-| `popup` | 居中弹窗 | 由插件箱 / 触发入口呼出 |
-| `floating` | 可拖拽悬浮窗 | 常驻，标题栏可拖；**拖出应用窗口再松手 = 转为独立桌面窗口**（落到拖放位置） |
-| `sidebar-toolbar` | 侧边栏工具栏按钮 | 点击呼出弹窗（或整页） |
-| `activity-bar` | 左侧活动栏按钮；图标取 `manifest.icon`，放不下折进「更多」菜单时也是同一枚 | 点击呼出弹窗（或整页） |
-| `status-bar` | 底部状态栏徽章 | 点击呼出弹窗（或整页） |
-| `outline` | 左侧大纲面板（标题列表下方） | 常驻，适合文档导航与结构类工具 |
-| `editor-tabs` | 标签栏按钮（文件标签右侧） | 点击呼出弹窗或整页 |
-| `editor-header` | 标题栏控制带（「编辑｜源码」那一条） | 与内置控制器并排，点击呼出弹窗或整页 |
+| `sidebar-input` | **AI 对话输入框上方** | 常驻 |
+| `messages-top` | **AI 对话消息区顶部** | 常驻 |
+| `right-panel` | **右侧停靠栏**：工作台右区里的插件页（占满整块右区、挤压主区），多面板自动变标签式，宽度可拖 240–560px 并记忆 | 常驻；有插件声明时默认展开，状态栏「AI 对话」开关或右区页签收起 |
+| `popup` | **弹窗**（居中） | 由插件箱 / 触发入口呼出 |
+| `floating` | **悬浮窗**（可拖拽） | 常驻，标题栏可拖；**拖出应用窗口再松手 = 转为独立桌面窗口**（落到拖放位置） |
+| `sidebar-toolbar` | **AI 对话工具栏**按钮 | 点击呼出弹窗（或整页） |
+| `activity-bar` | **左侧活动栏按钮**；图标取 `manifest.icon`，放不下折进「更多」菜单时也是同一枚 | 点击呼出弹窗（或整页） |
+| `status-bar` | **底部状态栏徽章** | 点击呼出弹窗（或整页） |
+| `outline` | **大纲面板（左侧）**，标题列表下方 | 常驻，适合文档导航与结构类工具 |
+| `editor-tabs` | **标签栏按钮**（文件标签右侧） | 点击呼出弹窗或整页 |
+| `editor-header` | **顶部控制带**（「编辑｜源码」那一条） | 与内置控制器并排，点击呼出弹窗或整页 |
 | `widget` | 桌面悬浮器窗口（独立窗口） | 常驻，**不支持被用户改位置** |
 | `window` | **独立桌面窗口**：每个面板一个真窗口，可透明、置顶、鼠标穿透，位置尺寸记忆 | 常驻，窗口自带标题条（拖拽 / 锁定 / 设置 / 关闭，**展示哪些由开发者在 manifest 里决定**）；桌面上最多同时开 6 个 |
-| `page` | 完整主区标签页（像文件标签一样切换、关闭） | 由插件箱点开 |
+| `page` | **完整页面（主区标签页）**，像文件标签一样切换、关闭 | 由插件箱点开 |
 
 共 14 个可声明位置；其中 13 个可被用户互移（`widget` 是独立窗口，不在移动目标里）。
 
@@ -85,7 +85,7 @@ title: 面板与界面扩展
       {
         "id": "quick",
         "title": "我的工具",
-        "icon": "🧰",
+        "icon": "lucide:Wrench",
         "location": "activity-bar",
         "content": { "type": "component", "sourceFile": "panels/quick.tsx" }
       }
@@ -94,9 +94,9 @@ title: 面板与界面扩展
 }
 ```
 
-- 想在点击时直接开成**整页**而不是弹窗，加 `"openMode": "page"`。
-- 用户可以在按钮上**右键 →「移动到…」**，把它搬到其他位置，覆盖持久保存；也可以选「恢复默认位置」。
-- 用户还可以在右键菜单里改「打开方式」（弹窗 / 整页），这一层设置优先于 `openMode`。
+- 想在点击时直接开成**主区标签页**，加 `"openMode": "page"`；想开成**整页**（无标签栏、活动栏按钮高亮为当前页），加 `"openMode": "fullpage"`。
+- 用户可以在面板上**右键 →「面板位置」**二级菜单里调整位置，覆盖持久保存；位置可以**多选**（例如同时保留活动栏入口和右侧停靠栏），父行显示「首个位置 +N」。菜单里还有「恢复默认位置」。
+- 用户还能在右键菜单里改「**打开方式**」（跟随位置 / 标签页 / 整页），这一层设置优先于 `openMode`；常驻位、悬浮窗、桌面窗口没有这一问。
 - 关掉的面板不会消失：插件箱 / 停靠栏的入口仍然在，状态栏开关也会保留（哪怕所有面板都被关过）。
 
 ::: tip 打开状态是全局的
@@ -182,12 +182,22 @@ title: 面板与界面扩展
 | --- | --- |
 | `serverId` | 本插件第一个 MCP 服务器的运行 id（`plugin-<插件id>-<服务器id>`）。**没启动时是空字符串** |
 | `pluginId` | 插件 id |
-| `ctx` | 实时运行环境：工作区、窗口、本窗口的 AI 选择、应用版本/主题/语言、当前划词 |
+| `ctx` | 实时运行环境：工作区、工作空间、窗口、本窗口的 AI 选择、应用版本/主题/语言、当前划词 |
 | `data` | `dataTool` 的结果（未声明 `dataTool` 时为空） |
 | `dataError` | 拉数据失败时的错误 |
 | `launch` | 打开入口携带的参数，形如 `{ params: { filePath, fileName, isFolder } }`（文件树右键菜单用） |
 
 **先防御再调用**：`serverId` 可能为空；`callTool` 失败不抛异常，返回 `{ success: false, error }`，两处都要处理。
+
+`ctx.workspace` 是**本窗口**此刻打开的一组根：`path` / `name`（激活根，旧写法）、`activePath`（同 `path`）、`roots`（整组 `{ path, name }[]`，第一项 = 激活根）。`ctx.space` 是用户保存的**命名工作空间**（工作区组合），不在任何空间里时为 `null`：
+
+| `ctx.space` 字段 | 含义 |
+| --- | --- |
+| `id` / `name` / `root` | 空间 id / 用户起的名字 / 资源根 `<notratHome>/spaces/<id>` |
+| `workspaces` | 该空间保存的**全部工作区** `{ path, name }[]`（含本窗口没加载的根），第一项 = 激活根 |
+| `activeWorkspace` | 本窗口激活根；不在清单里时为 `null` |
+
+要「在空间内所有项目里找东西 / 跨项目检索」用 `ctx.space.workspaces`；要操作当前窗口正在用的根，永远读 `ctx.workspace`。清单里可能包含暂时离线的盘符，遍历前先判断路径是否存在。
 
 ```tsx
 export default function MyPanel(props) {
@@ -223,7 +233,7 @@ export default function MyPanel(props) {
 
 适合桌面悬浮器、弹窗菜单里的「一键动作」条目：点击直接调用本插件 MCP 工具，不渲染任何面板。
 
-## 整页面板
+## 页面与整页
 
 `location: "page"` 会让面板成为一个**主区标签页**（标签 key 是 `pluginpage:<面板key>`），能与文件标签混排、一键关闭。需要大画布的场景（图谱、看板、仪表盘）用它。
 
@@ -234,7 +244,7 @@ export default function MyPanel(props) {
       {
         "id": "graph",
         "title": "我的图谱",
-        "icon": "🔱",
+        "icon": "lucide:Network",
         "location": "page",
         "content": { "type": "component", "sourceFile": "panels/graph.tsx", "fullBleed": true }
       }
@@ -244,7 +254,8 @@ export default function MyPanel(props) {
 ```
 
 - `fullBleed: true` 让组件铺满主区（去内边距与面板外壳），画布类组件要自己管内边距。
-- 用户也可以把任何面板右键改成整页打开，或把整页面板搬回其他位置，manifest 里声明的只是默认值。
+- 想要**整页**（占满主区、没有标签栏，和设置 / 图谱一样是「活动栏级」页面），有两种写法：`location: "page"` + `"openMode": "fullpage"`，或把它做成触发位（`activity-bar` 等）+ `"openMode": "fullpage"`。整页面板自带侧栏时，再点一次活动栏图标即可开合它。
+- 用户也可以把任何面板右键改成标签页 / 整页打开，或把面板搬回其他位置（位置可多选）；manifest 里声明的只是默认值。
 
 ## 应用内悬浮窗：location: "floating"
 
@@ -259,7 +270,7 @@ export default function MyPanel(props) {
       {
         "id": "note",
         "title": "便签",
-        "icon": "📝",
+        "icon": "lucide:NotebookPen",
         "location": "floating",
         "content": { "type": "component", "sourceFile": "panels/note.tsx" },
         "floating": { "remember": true, "x": 120, "y": 96 }
@@ -291,7 +302,7 @@ export default function MyPanel(props) {
       {
         "id": "todo",
         "title": "待办清单",
-        "icon": "✅",
+        "icon": "lucide:ListTodo",
         "location": "window",
         "content": { "type": "component", "sourceFile": "panels/todo.tsx", "fullBleed": true },
         "window": {
@@ -352,7 +363,7 @@ export default function MyPanel(props) {
 - **面板壳与设置是自带的**：你只管写组件内容；标题条（展示哪些控件由你决定，见上）、设置面板（不透明度 / 置顶 / 穿透 / 重置尺寸 / 拉回屏内）由宿主提供。**至少留一条操作路径**——关掉控制栏或按钮后，用户仍可右键面板打开窗口设置。
 - **主题跟随**：窗口里的组件跑在同一个 React 树与主题上下文里，用 `bg-background` / `text-foreground` 这类语义 class 就跟着用户主题走；自己写死颜色会在暗色主题下瞎。用了 `transparent` 时记得让面板内容自己带圆角和背景，否则内容会直接浮在桌面上。
 - **组件里能拿到的**：与其它位置一致（`props.pluginId`、面板自身的信息）。
-- 用户在插件箱里对它的右键菜单会多一条「打开独立窗口 / 改到独立窗口打开」，也能从「移动到…」把它搬回应用内。
+- 用户在插件箱里对它的右键菜单会多一条「打开独立窗口 / 改到独立窗口打开」，也能从右键「面板位置」把它搬回应用内。
 
 ### 运行时调窗口：window.notratPluginWindow
 
@@ -385,7 +396,8 @@ window.notratPluginWindow?.close();                               // 自己关�
 
 manifest 声明的是**默认位置**，用户随时可以覆盖：
 
-- **右键 →「移动到…」**：在 13 个位置之间互移，覆盖持久保存，可一键「恢复默认位置」。
+- **右键 →「面板位置」**：在 13 个位置之间调整，**可多选**（父行显示「首个位置 +N」），覆盖持久保存，可一键「恢复默认位置」。
+- **右键 →「打开方式」**：跟随位置 / 标签页 / 整页。只在选了触发位时出现。
 - **语义钩子类名**：面板外壳自带 `.notrat-plugin-panel`（所有插件面板）与 `.notrat-plugin-panel-<插件id>`（某个插件），内部还有 `-header` / `-body`；位置容器带 `.notrat-plugin-slot-<location>`。用户可以在对话里让 AI 调用 Slot 覆盖工具改样式（例如「把这个面板改成半透明」），也可以用 DIY 面板手写。插件作者不需要自己实现样式入口。
 
 ## 斜杠命令：commands

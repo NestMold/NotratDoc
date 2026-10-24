@@ -4,7 +4,7 @@ title: 快速开始
 
 # 快速开始
 
-这一页从零做一个最小可跑的插件：一个面板，装在聊天输入框上方。全程不改动 Notrat 本体，写完就能装进应用看到效果。
+这一页从零做一个最小可跑的插件：一个面板，装在 AI 对话输入框上方。全程不改动 Notrat 本体，写完就能装进应用看到效果。
 
 最小插件只需要两个文件：一份 `manifest.json`（声明要贡献什么）和一份面板源码。
 
@@ -12,7 +12,7 @@ title: 快速开始
 
 - Notrat 1.3.0 或更高版本。
 - 一个能写文件的目录（本文用 `D:\dev\my-plugin\` 举例，你可以换成任何位置）。
-- 如果后面要加 MCP 服务器，还需要本机有 Node.js，但第一步用不上。
+- 如果后面要加 MCP 服务器，建议本机装 Node.js 18 以上；一步用不上。没装也能跑 `command: "node"` 的服务器——宿主会回落到应用自带的 Node（只有 `node` 本体，不含 npm / npx）。
 
 ## 1. 建目录
 
@@ -32,7 +32,7 @@ my-plugin/
   "id": "my-plugin",
   "name": "我的插件",
   "version": "1.0.0",
-  "description": "一个最小可跑的 Notrat 插件：在聊天输入框上方显示当前工作区。",
+  "description": "一个最小可跑的 Notrat 插件：在 AI 对话输入框上方显示当前工作区。",
   "icon": "lucide:LayoutDashboard",
   "type": "feature",
   "manifestVersion": 2,
@@ -42,7 +42,7 @@ my-plugin/
       {
         "id": "main",
         "title": "我的面板",
-        "icon": "🧩",
+        "icon": "lucide:Puzzle",
         "location": "sidebar-input",
         "content": {
           "type": "component",
@@ -61,7 +61,7 @@ my-plugin/
 - `manifestVersion: 2` 是包版本标记。**当前客户端不据此分流**：写 `1`、写 `2`、不写，`contributions` 一样会被读取（仍建议写 `2`）。
 - `enabled` 是磁盘上的开关字段。手动把插件拷进 `~/.notrat/plugins/` 时**必须写 `enabled: true`**，否则插件会被装进来但不启用；从插件市场安装时安装器会自动补上（除非你显式写了 `enabled: false`）。
 - `content.sourceFile` 是相对包根的路径，主进程读盘时会把它内联成源码，磁盘上保留引用即可，方便你用编辑器改这份真文件。
-- 顶层 `icon` 推荐 `lucide:<名称>`（与 Notrat 本体同款线性图标）；用户给图片时用栅格 data URI，别写相对路径。`ui[].icon` 是面板自己的小图标（emoji/短文本），和顶层包图标不是一回事。
+- 顶层 `icon` 推荐 `lucide:<名称>`（与 Notrat 本体同款线性图标）；用户给图片时用栅格 data URI，别写相对路径。`ui[].icon` 是面板自己的小图标，同样推荐 `lucide:<名称>`（也兼容图片与 emoji），和顶层包图标不是一回事——顶层没写时，面包图标会回落第一个 UI 面板的这枚。
 
 ## 3. 写面板 panels/main.tsx
 
@@ -89,7 +89,7 @@ export default function MyPanel(props) {
 2. **样式内联，别写 Tailwind 工具类。** Tailwind 不扫描插件源码，`className="bg-blue-500"` 不会生成任何 CSS。主题色请用颜色变量，例如 `color: "hsl(var(--foreground))"`、背景 `hsl(var(--card))`、描边 `hsl(var(--border))`，这样亮暗主题自动跟随。
 3. **默认导出必须是函数。** 宿主只认 `export default` 出来的那个函数（函数组件、类组件都行）。
 
-`props.ctx` 是实时的运行环境元数据（工作区、窗口、本窗口的 AI 选择、应用版本与主题、当前划词），值一变面板自动重渲染。别在挂载时读一次就缓存。
+`props.ctx` 是实时的运行环境元数据（工作区、工作空间、窗口、本窗口的 AI 选择、应用版本与主题、当前划词），值一变面板自动重渲染。别在挂载时读一次就缓存。`ctx.workspace` 是本窗口当前的一组根（`path` / `roots`），`ctx.space` 是用户保存的工作空间（含该空间保存的全部工作区，不在空间里为 `null`）——两者的字段表见 [面板与组件扩展](/plugin-dev/panels)。
 
 ::: tip 先离线校验再装机
 面板写错一个字符，在应用里只会看到一张错误卡片。仓库提供离线校验脚本，秒级返回带行列号的错误：
@@ -118,6 +118,12 @@ node scripts/plugin-panel-check.mjs panels/main.tsx
 
 Windows 上是 `C:\Users\<你>\.notrat\plugins\`。Notrat 启动时会扫描这个目录；应用运行中拷进去，主进程的文件监听也会在 `manifest.json` 落地时触发同步。因为 manifest 里写了 `enabled: true`，装完即启用。
 
+::: tip 装到哪一档
+`~/.notrat/plugins/` 是**全局**范围，所有窗口、所有空间都看得见。只想让一组项目用到它，可以放到工作空间 `~/.notrat/spaces/<空间 id>/plugins/`，或某个工作区 `<工作区>/.notrat/plugins/`；同名插件按「工作区 > 工作空间 > 全局」就近生效。
+
+开发期放全局最省事；发布前建议把另外两档也装一遍，确认路径与权限没写死。
+:::
+
 ::: warning 整个目录一次拷进去
 安装信号是 `manifest.json` 的出现。如果先落 `manifest.json`、面板文件还没到位，这一次会读到空面板源码。整目录一次拷入，或拷完后随便改一下 `manifest.json` 再存一次即可。
 :::
@@ -145,7 +151,7 @@ Windows 上是 `C:\Users\<你>\.notrat\plugins\`。Notrat 启动时会扫描这�
       {
         "id": "main",
         "title": "我的面板",
-        "icon": "🧩",
+        "icon": "lucide:Puzzle",
         "location": "sidebar-input",
         "content": {
           "type": "component",
@@ -161,9 +167,9 @@ Windows 上是 `C:\Users\<你>\.notrat\plugins\`。Notrat 启动时会扫描这�
 
 ## 5. 看到效果
 
-- 聊天栏输入框上方出现「我的面板」卡片，显示当前工作区名与本窗口模型。
+- AI 对话输入框上方出现「我的面板」卡片，显示当前工作区名与本窗口模型。
 - 切换工作区、切换模型，面板内容立刻跟着变，这是 `props.ctx` 的实时性。
-- **右键面板 →「移动到…」**，可以在 13 个位置之间换位（消息区顶部、右侧停靠栏、悬浮窗、独立桌面窗口、状态栏徽章、活动栏按钮、完整页面……），覆盖会持久保存。
+- **右键面板 →「面板位置」**，目标可以多选，13 个位置随你勾（消息区顶部、右侧停靠栏、悬浮窗、独立桌面窗口、状态栏徽章、活动栏按钮、完整页面……）；选了触发位还能在同一张菜单里定「打开方式」（跟随位置 / 标签页 / 整页）。覆盖会持久保存。
 - 设置 →「扩展管理」→「插件」列表里出现「我的插件」，卡片上可以「禁用 / 重载 / 卸载 / 配置」。
 
 ## 6. 改代码怎么生效

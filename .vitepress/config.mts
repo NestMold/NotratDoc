@@ -51,6 +51,7 @@ export default defineConfig({
           text: "核心功能",
           items: [
             { text: "工作区与文件管理", link: "/guide/workspace" },
+            { text: "工作空间（多项目组合）", link: "/guide/spaces" },
             { text: "编辑器", link: "/guide/editor" },
             { text: "编辑器进阶（表格 / 代码 / 图表 / 图片）", link: "/guide/editor-advanced" },
             { text: "AI 对话", link: "/guide/chat" },

@@ -233,7 +233,7 @@ React.useEffect(() => {
     {
       "id": "fancy-outline",
       "title": "画布元素大纲",
-      "icon": "🗺",
+      "icon": "lucide:Map",
       "location": "outline",
       "extensions": ["fancy", "fnc"],
       "content": { "type": "component", "sourceFile": "panels/outline.tsx" }
