@@ -127,6 +127,7 @@ node scripts/plugin-panel-check.mjs --list tool-output.txt
 | 组件里 `props.serverId` 是空串 | 服务器还没连上（或没声明）。**先判断再用**，不要直接 `callTool` |
 | `ReferenceError: XXX is not defined`，一打开面板就崩 | 面板源码里的构建占位符（`/*__LPC__*/` 这类）没被内联。发布时要打成构建产物，别直接发源码，见 [面板与界面扩展](/plugin-dev/panels) |
 | 日志面板里什么都看不到 | ① 日志写到了 stdout（协议通道，收不到）；② 服务器压根没启动，看卡片上的「运行错误」或 `yarn log errors --local`；③ 禁用→启用一次让服务器重启 |
+| 面板关掉十来分钟后，服务器里起的本机端口服务没了 | 连接器空闲回收（10 分钟没有工具调用就停进程，整棵进程树一起走）。若这台服务本身就是长期服务、真实流量走 HTTP 不经过工具调用，在 manifest 里写 `"idleStopMs": 0`，见 [插件里的 MCP 服务器](/plugin-dev/mcp-servers#生命周期与重启) |
 
 ## 改了没生效？
 
