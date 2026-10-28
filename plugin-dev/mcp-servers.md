@@ -41,6 +41,15 @@ title: MCP 服务器
 ::: tip `command: "node"` 能被自动找到
 宿主启动前会解析 `node` 家族命令（`node` / `npx` / `npm` / `pnpm` / `yarn` / `bun`）：先看现状 `PATH`，没有再找常见安装目录（Homebrew、nvm、官方安装包等），最后回落到**应用自带的 Node**（只有 `node` 本体，20.x）。所以用户即使没装 Node，纯 `node server.js` 的插件也能跑起来；`npx` 这类还是需要他本机有对应运行时。
 
+::: warning 鸿蒙（HarmonyOS）：没有 node，服务器改为「进程内托管」
+鸿蒙设备上没有 `node` 可执行文件（也没有 `npx` / `python` / 外部浏览器），宿主会把
+`command: "node"` + 脚本加载进自己的 worker 里跑：stdio 协议不变，但**没有全局 `fetch`**
+（HTTP 请用 `http` / `https` 内置模块），`WebSocket` 由宿主补上，`sse` / `http` 传输不可用。
+随包携带的纯 JS 依赖能正常解析，原生 `.node` 模块不行。
+
+完整清单与写法建议见 [在鸿蒙（HarmonyOS）上](/plugin-dev/harmonyos)。
+:::
+
 ::: warning 服务器入口尽量用 CJS，或显式声明 ESM
 应用内置的 Node 是 20.x，对「内容是 ESM、最近的 `package.json` 又没写 `type: "module"`」的 `.js` 会按 CJS 解析，报 `Cannot use import statement outside a module`。这种机器（macOS 从 Finder 启动、用户没装 Node）正好会走到内置 Node 兜底。
 

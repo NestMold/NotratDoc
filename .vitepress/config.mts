@@ -113,6 +113,7 @@ export default defineConfig({
             { text: "MCP 服务器", link: "/plugin-dev/mcp-servers" },
             { text: "编辑器与组件扩展", link: "/plugin-dev/editor" },
             { text: "调试与日志", link: "/plugin-dev/debug" },
+            { text: "在鸿蒙（HarmonyOS）上", link: "/plugin-dev/harmonyos" },
             { text: "打包与发布", link: "/plugin-dev/publish" },
           ],
         },
