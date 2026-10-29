@@ -13,6 +13,7 @@ title: 安装与首次启动
 | Windows | Windows 10 及以上（64 位） | `.exe`（NSIS 安装程序） |
 | macOS | macOS 11 及以上 | `.dmg`（推荐）/ `.zip` |
 | Linux | 主流发行版（x86_64） | `.AppImage`（推荐）/ `.deb` / `.rpm` / `.tar.gz` |
+| 鸿蒙（HarmonyOS NEXT） | HarmonyOS 5.0.3(15) 及以上 · 手机 / 平板 / 2in1 | `.hap`（需要在电脑上用 `hdc` 安装，见下） |
 
 内存建议 8 GB 起步；如果你打算跑**本地模型**（Ollama / LM Studio），按那个模型本身的要求另算。
 
@@ -25,6 +26,7 @@ title: 安装与首次启动
 - **Windows**：下载 `.exe` 直接双击。
 - **macOS**：`.dmg` 拖进「应用程序」；`.zip` 解压后同样是拖进「应用程序」。
 - **Linux**：默认给 AppImage，可以在平台标签下切成 deb / rpm。
+- **鸿蒙（HarmonyOS NEXT）**：给的是 `.hap`。**它不能像桌面版那样双击安装**，需要一台电脑用 `hdc` 装进去，见下。
 
 ::: tip 下哪个版本？
 下载区列的是**最新稳定版**。如果你在别人的教程里看到某个功能而自己这版没有，先去 [更新记录](/changelog/) 对一下那个功能是哪个版本引入的。
@@ -96,6 +98,88 @@ sudo rpm -i notrat-<版本>_x86_64.rpm
 ```bash
 sudo apt install libfuse2
 ```
+:::
+
+### 鸿蒙（HarmonyOS NEXT）
+
+鸿蒙上没有「未知来源安装」这个开关。把 `.hap` 下载到手机上、在文件管理里点它，**不会有任何反应**——安装必须由电脑上的命令行工具 `hdc` 完成。
+
+所以这一步比桌面版麻烦，它本质上是开发者安装，不是「装个软件」那类操作。
+
+::: warning 先确认这条路适合你
+接下来要开开发者模式、在电脑上装命令行工具、敲三条命令，任何一步没做包都装不上。如果你只是想先在手机上试试，建议用 Windows / macOS / Linux 版；鸿蒙版是窄版本，功能比桌面版少，而且没有自动更新。
+:::
+
+**第一步：设备开开发者模式**
+
+1. 设置 → 关于本机 → 连续点击「版本号」7 次（部分机型叫「软件版本」），按提示输入锁屏密码
+2. 回设置 → 系统 → **开发者选项** → 打开「USB 调试」
+
+**第二步：电脑上拿到 hdc**
+
+`hdc` 是鸿蒙的设备调试命令行，随 SDK 一起发，不单独下载：
+
+- 装过 DevEco Studio：在 `sdk/default/openharmony/toolchains/hdc`（Windows 是 `hdc.exe`）
+- 没装过：从华为开发者官网下载 **Command Line Tools**，解压后同样在 `toolchains/` 下
+
+把 `toolchains/` 加进 PATH，或者在终端里用完整路径调用。
+
+**第三步：连上并安装**
+
+用 USB 线把设备连到电脑。手机第一次会弹「是否允许调试」，点**允许**（勾上「始终允许」就不用每次都点）。然后在电脑终端里：
+
+```bash
+hdc list targets
+# 有输出（一串设备序列号）= 连上了；输出 [Empty] = 没连上
+
+hdc app install -r notrat-<版本>-arm64.hap
+# -r 是覆盖安装，以后升级也用这一条
+
+hdc shell aa start -a EntryAbility -b cn.notrat.hmos
+```
+
+前两步在 `Notrat-<版本>-arm64.hap` 所在目录执行，或者把路径换成绝对路径。
+
+::: details 在鸿蒙 PC（2in1）上装
+鸿蒙 PC 本身就是那台「电脑」，不用再另找机器。本机开了开发者模式、本机也装了 `hdc` 时，`hdc list targets` 会把**本机自己**列出来（形如 `127.0.0.1:34953`），后面的安装命令与上面一字不差。
+
+本机没有 `hdc`，就照上面的做法用另一台电脑通过 USB 连过来装。
+
+另外注意：鸿蒙 PC 上装的是这个 `.hap`，桌面版的 `.exe` / `.dmg` / `.AppImage` 在鸿蒙上装不了。
+:::
+
+::: details ▶ 视频版：用图形工具装（社区方法，非官方）
+有社区工具把上面这套包成了图形界面——「小白调试助手」（Auto-Installer），拖进 `.hap`、连上设备就能装，不想碰命令行可以看这个视频（演示的是鸿蒙电脑；手机、平板一样，用另一台电脑跑它）：
+
+<div class="video-embed"><iframe src="https://player.bilibili.com/player.html?bvid=BV1m6TizjEKt&page=1&danmaku=0" scrolling="no" frameborder="no" allowfullscreen="true" loading="lazy"></iframe></div>
+
+视频打不开就看 [哔哩哔哩原页](https://www.bilibili.com/video/BV1m6TizjEKt/)。注意两点：它是**闭源**的第三方工具，而且自带证书、**会把安装包重签成它自己的签名**——所以用它装的和照本文命令装的不算同一个应用，换方法前请先卸载干净（本地数据会丢）。介意就走上面的命令行，效果一样。
+:::
+
+::: details 不想插线：无线调试
+开发者选项 → 无线调试 → 打开，设备上会给出 IP 和端口，电脑端 `hdc tconn <IP>:<端口>` 连上之后，装包命令与插线时完全一样。
+:::
+
+::: details 装不上？先对一下现象
+
+| 现象 | 原因与处理 |
+| --- | --- |
+| `hdc list targets` 输出 `[Empty]` | USB 调试没开；数据线只供电不传数据；或手机上的授权弹窗没点「允许」 |
+| `hdc: command not found` | `toolchains/` 没进 PATH，用完整路径调用 |
+| 安装报 `9568297` | 设备系统版本低于 5.0.3(15)——先把系统升级，再装 |
+| 安装报 `9568289` | 包的签名或受限权限与设备策略不符——重新下载官网的完整包，别用被改过名/改过的文件 |
+| 传到一半失败、超时 | 换根数据线或换个 USB 口，尽量别走 USB 集线器 |
+| 空间不足 | `.hap` 本身约 400 MB，安装后还要再占一份，设备至少留 2 GB |
+| 装上了但白屏 | 鸿蒙版仍在适配中，先看 [常见问题](/guide/faq) |
+:::
+
+**更新和卸载**
+
+- **没有自动更新**：鸿蒙版不走应用市场，也就没有桌面版那套后台下载安装。有新版本时回官网下新的 `.hap`，`hdc app install -r` 覆盖安装，设置和数据都保留。
+- **卸载**：桌面长按图标 → 卸载；或 `hdc shell bm uninstall -n cn.notrat.hmos`。
+
+::: tip 为什么鸿蒙版要这么装
+正常的途径是把应用上架华为应用市场，由市场负责安装、更新和用户授权。Notrat 目前没有上架鸿蒙市场，所以只能走开发者安装这条路——这也是下载区把鸿蒙排在最后、不主动推荐的原因。
 :::
 
 ## 第一次启动
@@ -221,6 +305,7 @@ Notrat 启动时会自己检查有没有新版本（启动后几秒，静默进�
 - **Windows**：设置 → 应用 → Notrat → 卸载
 - **macOS**：从「应用程序」拖到废纸篓
 - **Linux**：`sudo apt remove notrat` / `sudo rpm -e notrat`（AppImage 直接删文件）
+- **鸿蒙**：桌面长按图标 → 卸载；或电脑上 `hdc shell bm uninstall -n cn.notrat.hmos`
 
 卸载后如果还想彻底清干净，按上表删掉应用数据目录。你的笔记文件夹不受影响，一直都在。
 

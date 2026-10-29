@@ -1130,6 +1130,25 @@ html:has(.VPSidebar) .nr-footer {
   }
 }
 
+/* 文档里的视频嵌入（B 站 iframe）：按 16:9 撑开，去掉 iframe 自带边框。
+   离线副本里外部 iframe 加载不出来，正文下面那条「原页」链接负责兜底。 */
+.vp-doc .video-embed {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%;
+  margin: 14px 0 8px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--vp-c-bg-soft);
+}
+.vp-doc .video-embed iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
 /* 动效降级 */
 @media (prefers-reduced-motion: reduce) {
   *,
