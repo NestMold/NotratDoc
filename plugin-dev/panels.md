@@ -46,6 +46,9 @@ title: 面板与界面扩展
 | `extensions` | 可选，文件类型过滤（小写、不含点）。当前由 `location: "outline"` 消费：只有当前打开文件的扩展名命中时该面板才出现，未声明 = 始终显示 |
 | `window` | 可选，仅 `location: "window"` 有意义：独立桌面窗口的默认参数（尺寸、透明度、置顶、鼠标穿透……）。见下方「独立桌面窗口」 |
 | `floating` | 可选，仅 `location: "floating"` 有意义：应用内悬浮窗的首开位置与「是否记住位置」。见下方「应用内悬浮窗」 |
+| `button` | 可选，触发位按钮自绘：`{ "mode": "custom", "content": { "type": "component", "sourceFile": "…" } }`。位置、点击、右键菜单、键盘与自动收纳都归宿主，插件只画按钮里面的内容，组件会收到 `buttonSize`（CSS px）。缺省或 `"mode": "host"` = 宿主画图标。常驻位忽略本字段 |
+| `anchor` | 可选，语义锚点：`{ "relativeTo": "send-button" }` = 挨着发送键（等同用户右键「固定到工具栏右侧」），`{ "relativeTo": "toolbar" }` = 工具栏行内。不用写坐标、不用查 DOM；未知锚点回退默认排布并记一条体检告警 |
+| `order` | 可选，同一宿主位置内的排序，升序、缺省 `0`；相同值保持声明顺序。只影响渲染顺序，不改用户的位置覆盖 |
 
 ## 位置一览
 
@@ -67,6 +70,8 @@ title: 面板与界面扩展
 | `page` | **完整页面（主区标签页）**，像文件标签一样切换、关闭 | 由插件箱点开 |
 
 共 14 个可声明位置；其中 13 个可被用户互移（`widget` 是独立窗口，不在移动目标里）。
+
+除了这 14 个内置位置，插件声明**命名插槽**之后，`location` 也可以写成 `plugin:<插件id>:<插槽id>`，见下方「命名插槽：slots」。
 
 ::: tip 编辑器里的模式切换别用 editor-tabs
 如果你想让用户切换当前这个文件的源码/可视化模式，用 `editors[].dualView` 或 `modes`，它跟着编辑器走、切文件自动显隐。[编辑器与组件扩展](/plugin-dev/editor) 里有说明。
@@ -103,7 +108,7 @@ title: 面板与界面扩展
 「哪个面板正开着」存在全局 store 里，任意按钮点开、Esc 或点遮罩关闭。你不需要自己管理这份状态，只管声明贡献。
 :::
 
-## 面板内容：四种类型
+## 面板内容：五种类型
 
 ### markdown：静态文本
 
@@ -232,6 +237,17 @@ export default function MyPanel(props) {
 ```
 
 适合桌面悬浮器、弹窗菜单里的「一键动作」条目：点击直接调用本插件 MCP 工具，不渲染任何面板。
+
+### action：点一下直接执行
+
+```json
+{ "type": "action", "sourceFile": "actions/voice.tsx" }
+```
+
+动作贡献不弹面板：点击后在应用根挂载你的组件执行一次（比如开始录音、切换开关、发一条消息）。组件 props 与面板一致：`{ serverId, pluginId, ctx }`；如果再配 `button.mode: "custom"`，按钮上就能实时显示「录音中」这类状态。
+
+- 只能挂在触发位：`sidebar-toolbar` / `activity-bar` / `status-bar` / `editor-tabs` / `editor-header`。常驻位与命名插槽都不接受动作贡献，写错会回落到输入框上方并记体检告警。
+- 在工具栏上右键同样可以「固定到工具栏右侧」，用户取消固定会存成显式 `false`，不会被锚点默认拉回去。
 
 ## 页面与整页
 
@@ -399,6 +415,205 @@ manifest 声明的是**默认位置**，用户随时可以覆盖：
 - **右键 →「面板位置」**：在 13 个位置之间调整，**可多选**（父行显示「首个位置 +N」），覆盖持久保存，可一键「恢复默认位置」。
 - **右键 →「打开方式」**：跟随位置 / 标签页 / 整页。只在选了触发位时出现。
 - **语义钩子类名**：面板外壳自带 `.notrat-plugin-panel`（所有插件面板）与 `.notrat-plugin-panel-<插件id>`（某个插件），内部还有 `-header` / `-body`；位置容器带 `.notrat-plugin-slot-<location>`。用户可以在对话里让 AI 调用 Slot 覆盖工具改样式（例如「把这个面板改成半透明」），也可以用 DIY 面板手写。插件作者不需要自己实现样式入口。
+
+## 命名插槽：slots
+
+插件可以声明一块**容器**，让别的插件把面板放进来。插槽本身没有界面代码，只负责占位；渲染、排序、错误边界都归宿主。
+
+```json
+{
+  "contributions": {
+    "slots": [
+      {
+        "id": "toolbar-extra",
+        "title": "我的工具条",
+        "location": "sidebar-input",
+        "order": 0,
+        "direction": "row",
+        "accepts": ["other-plugin-id"]
+      }
+    ]
+  }
+}
+```
+
+| 字段 | 说明 |
+| --- | --- |
+| `id` | 插件内唯一，只允许小写字母、数字与 `-`。完整插槽 key = `plugin:<你的插件id>:<id>` |
+| `title` | 可选。插槽里有内容时渲染成一节小标题；插槽为空时宿主什么都不画 |
+| `location` | 插槽挂在哪个常驻容器位：`sidebar-input` / `welcome-input` / `messages-top` / `right-panel` / `outline` |
+| `order` | 在宿主位置里的排序，升序，缺省 `0` |
+| `direction` | 子项排列方向，`row` / `column`，缺省 `column` |
+| `accepts` | 允许谁往里放：`"self"`（缺省，只有自己）/ `"all"` / 插件 id 数组。默认不开放 |
+
+其它插件把面板的 `location` 写成插槽 key 就落进来：
+
+```json
+{
+  "contributions": {
+    "ui": [
+      {
+        "id": "extra",
+        "title": "我的按钮",
+        "location": "plugin:my-plugin:toolbar-extra",
+        "content": { "type": "markdown", "text": "来自另一个插件。" }
+      }
+    ]
+  }
+}
+```
+
+- 没被 `accepts` 接受、指向不存在的插槽、`plugin:` 前缀写错，这三种情况都回落到**输入框上方**（`sidebar-input`），同时在插件体检结果里留一条告警，不会静默消失。
+- 工具式动作贡献（`action: "tool"`）只能做触发位按钮，不能放进插槽。
+- 用户右键面板 →「面板位置」时会看到「插槽 · 标题」这一项，取消勾选就把面板从插槽移出。
+
+## 受控 DOM 钩子：domHooks
+
+想微调宿主的某块界面（字号、圆角、间距、颜色）又不想整组件替换时，用 `domHooks`。它比任意 CSS 严格得多：
+
+- 选择器只能写宿主槽位表里的语义类名，例如 `.notrat-sidebar-input`、`.notrat-filetree`、`.notrat-plugin-slot-right-panel`。完整清单见 `src/shared/uiSlots.ts`。
+- 属性只收观感类：颜色、边框、圆角、字体、间距、阴影、`fill` / `stroke` 等。`position`、`display`、`z-index`、`pointer-events`、`transform`、`filter` 一律拒绝。
+- 值里不许出现 `url(`、`image-set(`、`image(`、`cross-fade(`、`@import`、`expression(`、`!important`，也不许有分号、大括号、尖括号；单个值不超过 200 字符。
+- 必须在 `permissions.dom` 里声明该选择器（写 `"*"` 表示全部），没声明的整条不生效。
+
+```json
+{
+  "contributions": {
+    "permissions": { "dom": [".notrat-sidebar-input"] },
+    "domHooks": [
+      {
+        "id": "round-input",
+        "selector": ".notrat-sidebar-input",
+        "type": "style",
+        "value": { "border-radius": "18px", "font-size": "13px" }
+      }
+    ]
+  }
+}
+```
+
+- `type` 目前只支持 `"style"`，写别的会被拒绝。
+- 生效方式：宿主把已启用插件的全部钩子合成一条 `<style id="notrat-plugin-dom-hooks">`。插件禁用、卸载、更新时整条重算，样式自然还原，不会残留。
+- 用户有一键总闸：插件箱右上角「⋯」里的「关闭插件界面样式改动（DOM 钩子）」。关掉后所有插件的钩子样式一起消失，不用重启。
+- 每个 `id` 在插件内唯一；校验失败的条目会被丢弃，原因写进插件体检告警。
+
+## 权限声明：permissions
+
+`permissions` 首先是给用户看的：装插件时要能看见它想碰什么。宿主能执行的部分会按声明收口，目前只有 `dom` 是硬约束。
+
+| 字段 | 说明 | 宿主是否强制 |
+| --- | --- | --- |
+| `network` | 允许访问的域名，可带端口 | 否，展示用。插件自带的 MCP 服务器是独立的 Node 子进程，宿主不做网络代理 |
+| `filesystem` | 允许访问的路径，可用 `${workspace}` / `${pluginDir}` | 否，展示用 |
+| `dom` | 允许修改的语义选择器，`"*"` 表示全部 | 是。每条 `domHooks[].selector` 必须出现在这里 |
+| `clipboard` | 是否使用剪贴板 | 否，展示用。浏览器的剪贴板 API 无法由宿主拦截 |
+
+```json
+{
+  "contributions": {
+    "permissions": {
+      "network": ["api.example.com"],
+      "filesystem": ["${workspace}/notes"],
+      "dom": [".notrat-sidebar"],
+      "clipboard": true
+    }
+  }
+}
+```
+
+::: warning 这不是沙箱
+声明是契约与展示：除 `dom` 外，宿主目前不会因为没声明就拦截对应行为。插件能做什么仍然取决于你写的代码和它启动的 MCP 服务器。如实写权限，既是对用户负责，也为以后的沙箱化留好接口。
+:::
+
+## 插件 UI 套件：@notrat/plugin-ui
+
+面板与按钮里别再各画一套按钮和输入框。宿主提供了一套稳定的控件，直接 import：
+
+```tsx
+import { Button, Field, Input, Row, Stack, Badge } from "@notrat/plugin-ui";
+
+export default function Panel() {
+  return (
+    <Stack>
+      <Field label="名字"><Input placeholder="输入" /></Field>
+      <Row>
+        <Button variant="primary">保存</Button>
+        <Button variant="ghost">取消</Button>
+        <Badge tone="success">就绪</Badge>
+      </Row>
+    </Stack>
+  );
+}
+```
+
+可用的导出：
+
+| 导出 | 说明 |
+| --- | --- |
+| `Button` | `variant`: `primary` / `secondary` / `ghost` / `danger`；`size`: `sm` / `md` |
+| `IconButton` | 只有一个图标的方形按钮，带 `title` |
+| `Field` | 标签 + 说明 + 控件的一行，`label`、`hint` |
+| `Input` / `Textarea` / `Select` / `Switch` | 与设置页同款的输入控件 |
+| `Card` / `Row` / `Stack` | 容器：白卡 / 横排 / 竖排 |
+| `Badge` | `tone`: `muted` / `info` / `success` / `warning` / `danger` |
+| `Spinner` / `Empty` | 加载中 / 空状态 |
+| `PLUGIN_UI_VERSION` | 套件版本号，运行时判断兼容用 |
+
+- 它不是 npm 包：插件源码编译时，`import … from "@notrat/plugin-ui"` 由宿主解析。老写法 `@/plugin-ui` 也映射到同一模块。
+- 控件用的是宿主语义 token，跟随当前主题与浅深色自动变化，不用自己适配。
+- 想在触发位按钮里画自绘内容，同样用这套控件。
+
+### 按 shadcn 路径写的 import 也能跑
+
+提案或示例里常按 shadcn 目录写 `import { Button } from "@/components/ui/button"`。Notrat 仓库里没有这个目录，但宿主把下列路径映射到了同一套控件，**不用改代码**：
+
+```text
+@/components/ui            @/components/ui/button    @/components/ui/input
+@/components/ui/textarea   @/components/ui/select    @/components/ui/switch
+@/components/ui/card       @/components/ui/badge     @/components/ui/label
+@/components/ui/separator  @/components/ui/skeleton  @/components/ui/spinner
+@/lib/utils                （提供 cn）
+```
+
+shadcn 的词汇会被翻译成套件实现：`variant` 的 `default` → `primary`、`destructive` → `danger`、`outline` / `secondary` → `secondary`、`link` / `ghost` → `ghost`；`size` 的 `default` / `lg` → `md`、`sm` → `sm`、`icon` → 方形。`Card` 额外提供 `CardHeader` / `CardTitle` / `CardDescription` / `CardContent` / `CardFooter`。
+
+与真正的 shadcn 的差别（有意为之）：
+
+- 没有 Radix。`asChild` 只做「克隆子节点 + 合并 className」；`Select` 是原生 `<select>`，**不支持** `SelectTrigger` / `SelectContent` / `SelectItem` 复合写法；没有 `Dialog` / `Popover` / `Tooltip` / `Form` 等需要 portal 与焦点的组件。
+- 这些路径只保证上表列出的模块名；别的新路径仍然会报「不在可用列表中」。需要新控件请直接提需求，或改用 `@notrat/plugin-ui` 的现有导出。
+
+::: tip 优先用第一条路径
+`@notrat/plugin-ui` 是正式 API，`@/components/ui/*` 只是为了让照提案写的代码能跑。新代码建议写前者。
+:::
+
+## 插件级状态：ctx.state
+
+面板组件拿到的 `ctx.state` 是宿主给的插件级内存状态仓。面板卸载重挂后数据还在，适合放「这次会话里的选中项、正在进行的任务」这类不需要跨重启的数据。
+
+```tsx
+import { useEffect, useState } from "react";
+import { Button } from "@notrat/plugin-ui";
+
+export default function Panel(props) {
+  const { ctx } = props;
+  const [count, setCount] = useState(() => ctx.state.get("count", 0));
+  useEffect(() => ctx.state.subscribe("count", (v) => setCount(v ?? 0)), [ctx]);
+  return <Button onClick={() => ctx.state.set("count", count + 1)}>{count}</Button>;
+}
+```
+
+| 方法 | 说明 |
+| --- | --- |
+| `get(key, fallback?)` | 读一个键，不存在时返回 `fallback` |
+| `set(key, value)` | 写一个键并通知订阅者（同值写入也会通知） |
+| `delete(key)` | 删除一个键，订阅者收到 `undefined` |
+| `keys()` | 当前所有键的快照 |
+| `subscribe(key, fn)` | 订阅单个键，返回取消函数 |
+| `subscribeAll(fn)` | 订阅全部键的变化，返回取消函数 |
+
+- 按 `pluginId` 隔离，别的插件读不到也写不进去。
+- 只在内存里，**不落盘**，应用重启即清空；插件禁用或卸载时整桶清空，重新启用从空开始。
+- 跟随窗口：每个窗口各一份，不跨窗口共享。需要跨重启、跨窗口的数据，写进你自己的 MCP 服务器。
 
 ## 斜杠命令：commands
 

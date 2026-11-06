@@ -94,7 +94,7 @@ Activity Gauge
 
 ## contributions 一览
 
-`contributions` 下共有九类声明面。每类都是数组，可以声明多条。
+`contributions` 下最常用的是下面十二类声明面：除 `permissions` 是对象外，其余都是数组，可以声明多条。完整字段清单以 `src/types/plugin-v2.ts` 的 `PluginContributions` 为准。
 
 | 字段 | 作用 | 关键字段 | 详见 |
 | --- | --- | --- | --- |
@@ -107,9 +107,12 @@ Activity Gauge
 | `editors` | 按扩展名接管文件编辑器 | `id`、`extensions[]`、`source`/`sourceFile` | [编辑器与组件扩展](/plugin-dev/editor) |
 | `fileTreeMenus` | 文件树右键菜单项 | `id`、`label`、`extensions[]`、`uiKey`/`tool` | [面板与界面扩展](/plugin-dev/panels) |
 | `toolHooks` | 工具调用前后的钩子（pre 可拦截） | `id`、`on`、`toolPattern`、`tool` | [插件里的 MCP 服务器](/plugin-dev/mcp-servers) |
+| `slots` | 命名插槽：声明一块容器，允许别的插件把面板放进来 | `id`、`location`、`accepts` | [面板与界面扩展](/plugin-dev/panels) |
+| `domHooks` | 受控 DOM 钩子：样式级微调，选择器与属性都受限、可一键还原 | `id`、`selector`、`type`、`value` | [面板与界面扩展](/plugin-dev/panels) |
+| `permissions` | 权限声明：装机可见，宿主能执行的部分按声明收口 | `network`、`filesystem`、`dom`、`clipboard` | [面板与界面扩展](/plugin-dev/panels) |
 
 ::: tip `diy` 不在 `contributions` 里
-上表是 `contributions` 的九个键（`src/types/plugin-v2.ts` 里的 `PluginContributions` 就这九个）。**组件覆盖与槽位覆盖不是其中一个**。`diy`（`overrides[]` / `slotOverrides[]`，v1 兼容）挂在包文件的**顶层**，与 `contributions` 平级。见 [编辑器与组件扩展](/plugin-dev/editor)。
+上表覆盖 `contributions` 最常用的十二个键。**组件覆盖与槽位覆盖不是其中一个**。`diy`（`overrides[]` / `slotOverrides[]`，v1 兼容）挂在包文件的**顶层**，与 `contributions` 平级。见 [编辑器与组件扩展](/plugin-dev/editor)。
 :::
 
 ## 字段类型不可信：渲染前必须归一化
