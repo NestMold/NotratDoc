@@ -27,14 +27,18 @@ AI 对话、AI 补全、专家，所有 AI 能力的总开关都在一个地方�
 
 ![服务商选择](/shots/guide/ai-provider-picker.png)
 
-顶部先摆三张**置顶卡**（OpenAI 一整行、Anthropic 一整行，右侧是「自定义兼容」），下面按四组列出**其余 20 张**：
+顶部先摆三张**置顶卡**（OpenAI 一整行、Anthropic 一整行，右侧是「自定义兼容」），下面按四组列出**其余 21 张**：
 
 | 分组 | 有哪些 |
 | --- | --- |
 | **在线服务（需要密钥）** | DeepSeek、智谱 GLM、月之暗面、通义千问、Grok、Perplexity、MiniMax、百川、硅基流动、小米 MiMo、火山方舟 等 |
-| **编程专用** | 智谱代码版、DeepSeek Coder、通义代码版、阿里云百炼 Coding、百炼 Coding (Claude 协议)、OpenAI Codex |
+| **编程专用** | 智谱代码版、DeepSeek Coder、通义代码版、阿里云百炼 Coding、百炼 Coding (Claude 协议)、OpenAI Codex、OpenCode Go |
 | **本地模型（免费、无需密钥）** | Ollama、LM Studio |
 | **自定义接入** | 自定义 Coding 等 |
+
+::: tip 订阅套餐也能直接选
+OpenCode Go / Go Plus 是订阅制，不按 API Key 计费：选「OpenCode Go」卡后贴订阅给的密钥即可，模型列表里的 GLM、Kimi、Qwen、Claude 等都走同一个兼容口。这个端点要求请求带会话标识，Notrat 会自动补上，不用自己填 Header。
+:::
 
 ### ② 填密钥 + 挑模型
 
