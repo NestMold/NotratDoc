@@ -225,7 +225,7 @@ export default function MyPanel(props) {
 ```
 
 ::: warning 组件的运行环境
-可用模块只有 `react`、`react-dom`、`lucide-react`、`@/utils/cn`、`@/store`、`@/store/slices/componentOverride`、`@/utils/tokenEstimate`，可以写 `import`（编译后交给宿主的 `require` 白名单），白名单外报错；`React` 另外由宿主作为形参注入，直接引用即可。样式必须内联（Tailwind 不扫描插件源码），主题色用 `hsl(var(--foreground))` 这类颜色变量。细节见 [编辑器与组件扩展](/plugin-dev/editor)。
+可用模块只有 `react`、`react-dom`、`lucide-react`、`@notrat/plugin-ui`（含 `@/plugin-ui`、`@/components/ui/*`、`@/lib/utils` 兼容路径）、`@/utils/cn`、`@/store`、`@/store/slices/componentOverride`、`@/utils/tokenEstimate`，可以写 `import`（编译后交给宿主的 `require` 白名单），白名单外报错（`three` 这类第三方库要随插件源码一起打包进来）；`React` 另外由宿主作为形参注入，直接引用即可。渲染进程没有 Node `require`，但 `window.electronAPI` 是暴露的——`fs` 读写文件、`terminal.executeCommand` 起进程、`fetch` 调网络、`mcp.callTool` 调连接器都能直接用。样式必须内联（Tailwind 不扫描插件源码），主题色用 `hsl(var(--foreground))` 这类颜色变量。细节见 [编辑器与组件扩展](/plugin-dev/editor) 与 [主题与皮肤](/plugin-dev/theme)。
 :::
 
 **坏面板不会拖垮宿主**：每个面板都包了错误边界，渲染抛错只会在那个位置降级成一张错误卡片（写着插件 id 与错误信息，带「卸载」按钮），侧边栏与整个界面照常可用。
@@ -493,6 +493,7 @@ manifest 声明的是**默认位置**，用户随时可以覆盖：
 ```
 
 - `type` 目前只支持 `"style"`，写别的会被拒绝。
+- **高级自定义（1.3.9+，仅开发者模式）**：用户先在 设置 → 开发者页顶部打开「开发者模式」（默认关闭），再打开「完全自定义」后，插件 `domHooks` 才接受**任意选择器 / 属性**（`powerMode`），可以整页换皮；用户没开时仍按上面的受限口径。组件黑名单（App / 认证 / 设置 / 权限 / 强制更新）始终锁定。完整皮肤做法见 [主题与皮肤](/plugin-dev/theme)。
 - 生效方式：宿主把已启用插件的全部钩子合成一条 `<style id="notrat-plugin-dom-hooks">`。插件禁用、卸载、更新时整条重算，样式自然还原，不会残留。
 - 用户有一键总闸：插件箱右上角「⋯」里的「关闭插件界面样式改动（DOM 钩子）」。关掉后所有插件的钩子样式一起消失，不用重启。
 - 每个 `id` 在插件内唯一；校验失败的条目会被丢弃，原因写进插件体检告警。
@@ -522,7 +523,7 @@ manifest 声明的是**默认位置**，用户随时可以覆盖：
 ```
 
 ::: warning 这不是沙箱
-声明是契约与展示：除 `dom` 外，宿主目前不会因为没声明就拦截对应行为。插件能做什么仍然取决于你写的代码和它启动的 MCP 服务器。如实写权限，既是对用户负责，也为以后的沙箱化留好接口。
+声明是契约与展示：除 `dom` 外，宿主目前不会因为没声明就拦截对应行为。插件 MCP 服务器是独立进程，但以当前用户权限运行（不是 OS 沙箱），能读写的文件与网络不受宿主代理限制；恶意插件可以做用户本机能做的任何事——只装可信来源。本地套餐门禁不信任渲染层：`ui:setTier` 只接受降级，升级必须由主进程向服务端取签名结果；`gateway:` / `evolution:` / `im-bridge:` 的写入与触发通道也在主进程统一拦截，非 Pro 直接返回 `tier_required`。
 :::
 
 ## 插件 UI 套件：@notrat/plugin-ui
@@ -614,6 +615,35 @@ export default function Panel(props) {
 - 按 `pluginId` 隔离，别的插件读不到也写不进去。
 - 只在内存里，**不落盘**，应用重启即清空；插件禁用或卸载时整桶清空，重新启用从空开始。
 - 跟随窗口：每个窗口各一份，不跨窗口共享。需要跨重启、跨窗口的数据，写进你自己的 MCP 服务器。
+
+## 插件间通信：ctx.on / once / emit
+
+同一个窗口里，多个插件面板可以用一条全局事件总线互相通知：
+
+```ts
+const off = ctx.on("myplugin:refresh", (payload) => reload(payload));
+ctx.once("myplugin:ready", () => boot());
+ctx.emit("myplugin:refresh", { id: 1 });
+```
+
+| 方法 | 说明 |
+| --- | --- |
+| `on(event, fn)` | 订阅，返回取消函数；插件卸载时该订阅会被自动清理 |
+| `once(event, fn)` | 只触发一次，触发后自动摘掉 |
+| `emit(event, ...args)` | 广播，同步调用所有订阅者 |
+
+- 事件名支持 `*` / `?` 通配，例如 `ctx.on("myplugin:*", handler)`。
+- 处理函数**同步执行**：不要在里面 `await` 长任务，也不要假设别的订阅者已经处理完。
+- 这条总线**只在当前窗口进程内**，不跨窗口、不跨实例。要跨进程通信，用你自己的 MCP 服务器。
+
+::: warning 内置事件名单目前没有派发方
+`PluginEvents` 里定义了 `file:opened` / `file:saved` / `workspace:changed` / `tool:called` 等 15 个事件常量，但**宿主当前并不派发它们**——订阅这些名字不会收到任何回调。
+
+这份名单是预留的命名约定，不是已经可用的事件。要做可靠的插件间通信，请**自己发、自己收**：
+
+- 用带插件名前缀的私有事件名，例如 `acme-foo:changed`；
+- **先有发布方，再写订阅方**；不要依赖宿主替你广播任何内置事件。
+:::
 
 ## 斜杠命令：commands
 
