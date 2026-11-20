@@ -110,6 +110,7 @@ export default defineConfig({
             { text: "快速开始", link: "/plugin-dev/quickstart" },
             { text: "manifest 清单参考", link: "/plugin-dev/manifest" },
             { text: "面板与界面扩展", link: "/plugin-dev/panels" },
+            { text: "主题与皮肤", link: "/plugin-dev/theme" },
             { text: "MCP 服务器", link: "/plugin-dev/mcp-servers" },
             { text: "编辑器与组件扩展", link: "/plugin-dev/editor" },
             { text: "调试与日志", link: "/plugin-dev/debug" },
@@ -135,6 +136,8 @@ export default defineConfig({
           text: "版本更新记录",
           items: [
             { text: "全部版本", link: "/changelog/" },
+            { text: "1.3.10", link: "/changelog/v1.3.10" },
+            { text: "1.3.9", link: "/changelog/v1.3.9" },
             { text: "1.3.8", link: "/changelog/v1.3.8" },
             { text: "1.3.7", link: "/changelog/v1.3.7" },
             { text: "1.3.6", link: "/changelog/v1.3.6" },
