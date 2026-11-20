@@ -136,6 +136,7 @@ export default defineConfig({
           text: "版本更新记录",
           items: [
             { text: "全部版本", link: "/changelog/" },
+            { text: "1.3.11", link: "/changelog/v1.3.11" },
             { text: "1.3.10", link: "/changelog/v1.3.10" },
             { text: "1.3.9", link: "/changelog/v1.3.9" },
             { text: "1.3.8", link: "/changelog/v1.3.8" },
